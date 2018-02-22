@@ -1,5 +1,6 @@
 package ru.lyubimov.weather.weatherapp;
 
+import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
 
@@ -32,12 +33,13 @@ public class OpenWeatherMapFetcher {
 
     /**
      *
-     * @param lat широта
-     * @param lon долгота
+     * @param location локация
      * @return погода с openweathermap.org
      */
-    public ForecastWeather downloadWeather(double lat, double lon) {
+    public ForecastWeather downloadWeather(Location location) {
         ForecastWeather weather = null;
+        double lat = location.getLatitude();
+        double lon = location.getLongitude();
         try {
             String jsonString = getUrlString(lat, lon);
             weather = parseItem(jsonString);

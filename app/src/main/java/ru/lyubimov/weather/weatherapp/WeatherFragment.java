@@ -2,14 +2,15 @@ package ru.lyubimov.weather.weatherapp;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +18,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
-import java.util.Locale;
+import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 
 /**
  * Created by Alex on 17.02.2018.
@@ -30,10 +30,18 @@ import java.util.Locale;
 
 public class WeatherFragment extends Fragment {
     private static final String TAG = "WeatherFragment";
-    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
-    private Location mLocation;
+    private static final String[] LOCATION_PERMISSIONS = new String[]{
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+    };
+
+    private static final int REQUEST_LOCATION_PERMISSIONS = 0;
+
     private FusedLocationProviderClient mFusedLocationClient;
+    private ForecastWeather mForecastWeather;
+
+    private TextView mLat;
 
     public static WeatherFragment newInstance() {
         return new WeatherFragment();
@@ -50,16 +58,15 @@ public class WeatherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.weather_fragment, container, false);
-        TextView tv = view.findViewById(R.id.loc);
-        tv.setText(Double.toString(mLocation.getLatitude()));
+        mLat = view.findViewById(R.id.loc);
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (!checkPermissions()) {
-            requestPermissions();
+        if (!hasLocationPermission()) {
+            requestPermissions(LOCATION_PERMISSIONS, REQUEST_LOCATION_PERMISSIONS);
         } else {
             getLastLocation();
         }
@@ -67,72 +74,55 @@ public class WeatherFragment extends Fragment {
 
     @SuppressWarnings("MissingPermission")
     private void getLastLocation() {
+        LocationRequest request = LocationRequest.create();
+        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        request.setNumUpdates(1);
+        request.setInterval(0);
         mFusedLocationClient.getLastLocation()
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                     @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            mLocation = task.getResult();
-                        } else {
-                            Log.w(TAG, "getLastLocation:exception", task.getException());
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            Log.i(TAG, "Got a fix: " + location);
+                            new FetchWeatherTask().execute(location);
                         }
                     }
                 });
     }
 
-    private void showSnackbar(final String text) {
-        View container = getActivity().findViewById(R.id.main_container);
-        if (container != null) {
-            Snackbar.make(container, text, Snackbar.LENGTH_LONG).show();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSIONS:
+                if (hasLocationPermission()) {
+                    //getWeather();
+                }
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    private void showSnackbar(final int mainTextStringId, final int actionStringId,
-                              View.OnClickListener listener) {
-        Snackbar.make(getActivity().findViewById(android.R.id.content),
-                getString(mainTextStringId),
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(getString(actionStringId), listener).show();
+    private boolean hasLocationPermission() {
+        int result = ContextCompat.checkSelfPermission(getActivity(), LOCATION_PERMISSIONS[0]);
+        return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean checkPermissions() {
-        int permissionState = ActivityCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION);
-        return permissionState == PackageManager.PERMISSION_GRANTED;
+    private void updateUI() {
+        mLat.setText(Double.toString(mForecastWeather.getWeathers().get(0).getTemperature().getTemp()));
     }
 
-    private void startLocationPermissionRequest() {
-        ActivityCompat.requestPermissions(getActivity(),
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                REQUEST_PERMISSIONS_REQUEST_CODE);
-    }
+    @SuppressLint("StaticFieldLeak")
+    private class FetchWeatherTask extends AsyncTask<Location, Void, ForecastWeather> {
 
-    private void requestPermissions() {
-        boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION);
+        @Override
+        protected ForecastWeather doInBackground(Location... locations) {
+            return new OpenWeatherMapFetcher().downloadWeather(locations[0]);
+        }
 
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale) {
-            Log.i(TAG, "Displaying permission rationale to provide additional context.");
-
-            showSnackbar(R.string.permission_rationale, android.R.string.ok,
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // Request permission
-                            startLocationPermissionRequest();
-                        }
-                    });
-
-        } else {
-            Log.i(TAG, "Requesting permission");
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
-            startLocationPermissionRequest();
+        @Override
+        protected void onPostExecute(ForecastWeather forecastWeather) {
+            mForecastWeather = forecastWeather;
+            updateUI();
         }
     }
-
 }
