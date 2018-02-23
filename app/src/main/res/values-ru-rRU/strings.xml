@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">Погода</string>
+
+    <string name="no_location_detected">Местоположение не установлено. Убедитесь, что геолокация включена на устройстве</string>
+    <string name="permission_rationale">Разрешение доступа к геолокации необходимо для корректнойработы программы.</string>
+    <string name="permission_denied_explanation">Разрешение доступа к геолокации было отклонено,но оно необходимо для корректной работы программы.</string>
+    <string name="wind_speed">м/с</string>
+
+    <string name="n">С</string>
+    <string name="ne">СВ</string>
+    <string name="e">В</string>
+    <string name="se">ЮВ</string>
+    <string name="s">Ю</string>
+    <string name="sw">ЮЗ</string>
+    <string name="w">З</string>
+    <string name="nw">СЗ</string>
+
+    <string name="wind_icon">Иконка ветра</string>
+    <string name="cloud_icon">Иконка облаков</string>
 </resources>

@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
+import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
 /**
  * Для получения данных о погоде будем использовать открытый api openweathermap.org, бесплатная
@@ -32,16 +34,20 @@ public class OpenWeatherMapFetcher {
     private static final String API_KEY = "appid";
 
     /**
-     *
-     * @param location локация
+     * @param container контейнер для запроса, содержащий локацию и локаль
      * @return погода с openweathermap.org
      */
-    public ForecastWeather downloadWeather(Location location) {
+    public ForecastWeather downloadWeather(RequestContainer container) {
+        Location location = container.getLocation();
+        Locale locale = container.getLocale();
+
         ForecastWeather weather = null;
         double lat = location.getLatitude();
         double lon = location.getLongitude();
+        String country = locale.getCountry();
+        Log.i(TAG, country);
         try {
-            String jsonString = getUrlString(lat, lon);
+            String jsonString = getUrlString(lat, lon, "metric", country);
             weather = parseItem(jsonString);
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to connect", ioe);
@@ -52,28 +58,17 @@ public class OpenWeatherMapFetcher {
     }
 
     /**
-     * Метод, используемый для получения строки запроса  для ру-зоны, первоначально будет
-     * использоваться данный метод.
-     * @param lat широта
-     * @param lon долгота
-     * @return возвращаемое значение - строка для подключения и получения json
-     */
-    private String buildUrl(double lat, double lon) {
-        return buildUrl(lat, lon, "metric", "ru");
-    }
-
-    /**
      * Построение строки запроса для получения общей строки запроса
      * @param lat широта
      * @param lon долгота
-     * @param metric единицы измерения
+     * @param units единицы измерения
      * @param lang язык
      * @return возвращаемое значение - строка для подключения и получения json
      */
-    private String buildUrl(double lat, double lon, String metric, String lang) {
+    private String buildUrl(double lat, double lon, String units, String lang) {
         Uri.Builder builder = ENDPOINT.buildUpon();
-        if (metric != null) {
-            builder.appendQueryParameter(UNITS, metric);
+        if (units != null) {
+            builder.appendQueryParameter(UNITS, units);
         }
         if (lang != null) {
             builder.appendQueryParameter(LANG, lang);
@@ -86,8 +81,9 @@ public class OpenWeatherMapFetcher {
         return builder.build().toString();
     }
 
-    private String getUrlString(double lat, double lon) throws IOException {
-        String completeUrl = buildUrl(lat, lon);
+
+    private String getUrlString(double lat, double lon, String units, String locale) throws IOException {
+        String completeUrl = buildUrl(lat, lon, units, locale);
         return new String(getUrlBytes(completeUrl));
     }
 

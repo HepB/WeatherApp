@@ -1,11 +1,21 @@
 <resources>
     <string name="app_name">WeatherApp</string>
 
-    <string name="no_location_detected">
-        No location detected. Make sure location is enabled on the device.
-    </string>
-
+    <string name="no_location_detected">No location detected. Make sure location is enabled on the device.</string>
     <string name="permission_rationale">Location permission is needed for core functionality</string>
-    <string name="permission_denied_explanation">Permission was denied, but is needed for core
-        functionality.</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core functionality.</string>
+    <string name="wind_speed">m/s</string>
+
+    <string name="n">N</string>
+    <string name="ne">NE</string>
+    <string name="e">E</string>
+    <string name="se">SE</string>
+    <string name="s">S</string>
+    <string name="sw">SW</string>
+    <string name="w">W</string>
+    <string name="nw">NW</string>
+
+    <string name="wind_icon">Wind icon</string>
+    <string name="cloud_icon">Cloud icon</string>
+
 </resources>

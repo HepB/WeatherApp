@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -23,6 +24,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
+import ru.lyubimov.weather.weatherapp.model.RequestContainer;
+import ru.lyubimov.weather.weatherapp.model.Weather;
 
 /**
  * Created by Alex on 17.02.2018.
@@ -41,7 +44,12 @@ public class WeatherFragment extends Fragment {
     private FusedLocationProviderClient mFusedLocationClient;
     private ForecastWeather mForecastWeather;
 
-    private TextView mLat;
+    private TextView mTemperature;
+    private TextView mCity;
+    private TextView mWeatherDescription;
+    private TextView mWindInformation;
+    private TextView mCloudsInformation;
+    private TextView mTimeStamp;
 
     public static WeatherFragment newInstance() {
         return new WeatherFragment();
@@ -58,7 +66,13 @@ public class WeatherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.weather_fragment, container, false);
-        mLat = view.findViewById(R.id.loc);
+
+        mTemperature = view.findViewById(R.id.temp_text);
+        mCity = view.findViewById(R.id.city_name);
+        mWeatherDescription=view.findViewById(R.id.weather_description);
+        mWindInformation = view.findViewById(R.id.wind);
+        mCloudsInformation = view.findViewById(R.id.clouds);
+        mTimeStamp = view.findViewById(R.id.date_stamp);
         return view;
     }
 
@@ -75,7 +89,7 @@ public class WeatherFragment extends Fragment {
     @SuppressWarnings("MissingPermission")
     private void getLastLocation() {
         LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         request.setNumUpdates(1);
         request.setInterval(0);
         mFusedLocationClient.getLastLocation()
@@ -84,7 +98,10 @@ public class WeatherFragment extends Fragment {
                     public void onSuccess(Location location) {
                         if (location != null) {
                             Log.i(TAG, "Got a fix: " + location);
-                            new FetchWeatherTask().execute(location);
+                            RequestContainer container = new RequestContainer();
+                            container.setLocale(getResources().getConfiguration().locale);
+                            container.setLocation(location);
+                            new FetchWeatherTask().execute(container);
                         }
                     }
                 });
@@ -95,9 +112,11 @@ public class WeatherFragment extends Fragment {
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS:
                 if (hasLocationPermission()) {
-                    //getWeather();
+                    getLastLocation();
                 }
+                break;
             default:
+                Toast.makeText(getContext(), getString(R.string.permission_denied_explanation), Toast.LENGTH_LONG).show();
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
@@ -107,16 +126,12 @@ public class WeatherFragment extends Fragment {
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void updateUI() {
-        mLat.setText(Double.toString(mForecastWeather.getWeathers().get(0).getTemperature().getTemp()));
-    }
-
     @SuppressLint("StaticFieldLeak")
-    private class FetchWeatherTask extends AsyncTask<Location, Void, ForecastWeather> {
+    private class FetchWeatherTask extends AsyncTask<RequestContainer, Void, ForecastWeather> {
 
         @Override
-        protected ForecastWeather doInBackground(Location... locations) {
-            return new OpenWeatherMapFetcher().downloadWeather(locations[0]);
+        protected ForecastWeather doInBackground(RequestContainer... containers) {
+            return new OpenWeatherMapFetcher().downloadWeather(containers[0]);
         }
 
         @Override
@@ -124,5 +139,23 @@ public class WeatherFragment extends Fragment {
             mForecastWeather = forecastWeather;
             updateUI();
         }
+    }
+
+    private void updateUI() {
+        Weather currentTimeWeather = mForecastWeather.getWeathers().get(0);
+        String temperature = String.format(getResources().getConfiguration().locale, "%.0f",
+                currentTimeWeather.getTemperature().getTemp()) + "c";
+        mTemperature.setText(temperature);
+        getResources().getConfiguration().locale.getCountry();
+
+        String cityName = mForecastWeather.getCity().getCityName();
+        mCity.setText(cityName);
+
+        String weatherDescription = currentTimeWeather.getCondition().getDescription();
+        mWeatherDescription.setText(weatherDescription);
+
+        ViewUtils.setWindInformation(getResources(), mWindInformation, currentTimeWeather.getWind());
+        ViewUtils.setCloudsInformation(mCloudsInformation, currentTimeWeather.getClouds());
+        ViewUtils.setTimeStamp(mTimeStamp, currentTimeWeather.getDateStamp());
     }
 }
