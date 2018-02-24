@@ -1,9 +1,15 @@
 package ru.lyubimov.weather.weatherapp;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import ru.lyubimov.weather.weatherapp.model.Weather;
 
@@ -47,10 +53,36 @@ public class ViewUtils {
         cloudsView.setText(inf.toString());
     }
 
-    public static void setTimeStamp(TextView timeView, long dateStampInSeconds) {
+    public static void setTimeStamp(Resources resources, TextView timeView, long dateStampInSeconds) {
         long timeInMills = dateStampInSeconds * 1000L; //время передается в секундах, переводим их в миллисекунды
         Date date = new Date(timeInMills);
-        String time = String.format("%1$tH:%1$tM", date);
+        String format = "%1$ta %1$tR";
+
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(new Date());
+        Calendar stampDate = Calendar.getInstance();
+        stampDate.setTime(date);
+
+        if(currentDate.get(Calendar.DAY_OF_YEAR) == stampDate.get(Calendar.DAY_OF_YEAR)) {
+            format = "%1$tR";
+        }
+
+        Locale locale = resources.getConfiguration().locale;
+        String time = String.format(locale, format, date);
         timeView.setText(time);
+    }
+
+    public static void setWeatherIcon(Context context, ImageView imageView, String iconName) {
+        Resources resources = context.getResources();
+        String fullName = "_" + iconName;
+        Log.i(TAG, fullName);
+        final int resourceId = resources.getIdentifier(fullName, "drawable", context.getPackageName());
+        imageView.setImageDrawable(resources.getDrawable(resourceId));
+    }
+
+    public static void setTemperatureInformation(Resources resources, TextView tempView, Weather.Temperature temp) {
+        String temperature = String.format(resources.getConfiguration().locale, "%.0f", temp.getTemp())
+                + "c" + (char) 0x00B0;
+        tempView.setText(temperature);
     }
 }

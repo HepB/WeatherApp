@@ -2,12 +2,12 @@ package ru.lyubimov.weather.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class ForecastWeather {
 
     @SerializedName("list")
-    private List<Weather> weathers;
+    private ArrayList<Weather> weathers;
     @SerializedName("city")
     private City city;
 
@@ -18,10 +18,10 @@ public class ForecastWeather {
         this.city = city;
     }
 
-    public List<Weather> getWeathers() {
+    public ArrayList<Weather> getWeathers() {
         return weathers;
     }
-    public void setWeathers(List<Weather> weathers) {
+    public void setWeathers(ArrayList<Weather> weathers) {
         this.weathers = weathers;
     }
 }

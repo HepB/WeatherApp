@@ -17,5 +17,6 @@
 
     <string name="wind_icon">Wind icon</string>
     <string name="cloud_icon">Cloud icon</string>
+    <string name="weather_icon">Weather icon</string>
 
 </resources>

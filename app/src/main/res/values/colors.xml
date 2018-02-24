@@ -5,6 +5,8 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorLightGray">#DDDDDD</color>
-    <color name="colorBackgroundDay">#33BBFF</color>
-    <color name="colorBackgroundNight">#0000CC</color>
+    <color name="colorGray">#999999</color>
+    <color name="colorBackgroundDay">#4aabda</color>
+    <color name="colorBackgroundNight">#2a8bba</color>
+    <color name="colorWhite">#FFFFFF</color>
 </resources>

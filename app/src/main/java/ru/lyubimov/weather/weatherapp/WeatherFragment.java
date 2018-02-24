@@ -3,6 +3,7 @@ package ru.lyubimov.weather.weatherapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -15,6 +16,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +26,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.ArrayList;
 
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
@@ -44,12 +50,14 @@ public class WeatherFragment extends Fragment {
     private FusedLocationProviderClient mFusedLocationClient;
     private ForecastWeather mForecastWeather;
 
+    private ImageView mWeatherIco;
     private TextView mTemperature;
     private TextView mCity;
     private TextView mWeatherDescription;
     private TextView mWindInformation;
     private TextView mCloudsInformation;
     private TextView mTimeStamp;
+    private LinearLayout mWeatherTimesLayout;
 
     public static WeatherFragment newInstance() {
         return new WeatherFragment();
@@ -69,10 +77,12 @@ public class WeatherFragment extends Fragment {
 
         mTemperature = view.findViewById(R.id.temp_text);
         mCity = view.findViewById(R.id.city_name);
-        mWeatherDescription=view.findViewById(R.id.weather_description);
+        mWeatherDescription = view.findViewById(R.id.weather_description);
         mWindInformation = view.findViewById(R.id.wind);
         mCloudsInformation = view.findViewById(R.id.clouds);
         mTimeStamp = view.findViewById(R.id.date_stamp);
+        mWeatherIco = view.findViewById(R.id.weather_ico);
+        mWeatherTimesLayout = view.findViewById(R.id.five_day_times_layout);
         return view;
     }
 
@@ -103,20 +113,25 @@ public class WeatherFragment extends Fragment {
                             container.setLocation(location);
                             new FetchWeatherTask().execute(container);
                         }
+                        else {
+                            Toast.makeText(getContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.i(TAG, Integer.toString(requestCode));
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS:
                 if (hasLocationPermission()) {
                     getLastLocation();
+                } else {
+                    Toast.makeText(getContext(), getString(R.string.permission_denied_explanation), Toast.LENGTH_LONG).show();
                 }
                 break;
             default:
-                Toast.makeText(getContext(), getString(R.string.permission_denied_explanation), Toast.LENGTH_LONG).show();
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
@@ -143,10 +158,6 @@ public class WeatherFragment extends Fragment {
 
     private void updateUI() {
         Weather currentTimeWeather = mForecastWeather.getWeathers().get(0);
-        String temperature = String.format(getResources().getConfiguration().locale, "%.0f",
-                currentTimeWeather.getTemperature().getTemp()) + "c";
-        mTemperature.setText(temperature);
-        getResources().getConfiguration().locale.getCountry();
 
         String cityName = mForecastWeather.getCity().getCityName();
         mCity.setText(cityName);
@@ -154,8 +165,49 @@ public class WeatherFragment extends Fragment {
         String weatherDescription = currentTimeWeather.getCondition().getDescription();
         mWeatherDescription.setText(weatherDescription);
 
+        ViewUtils.setTemperatureInformation(getResources(), mTemperature, currentTimeWeather.getTemperature());
         ViewUtils.setWindInformation(getResources(), mWindInformation, currentTimeWeather.getWind());
         ViewUtils.setCloudsInformation(mCloudsInformation, currentTimeWeather.getClouds());
-        ViewUtils.setTimeStamp(mTimeStamp, currentTimeWeather.getDateStamp());
+        ViewUtils.setTimeStamp(getResources(), mTimeStamp, currentTimeWeather.getDateStamp());
+        ViewUtils.setWeatherIcon(getContext(), mWeatherIco, currentTimeWeather.getCondition().getIconName());
+
+        setupWeatherView();
+    }
+
+    public class WeatherAdapter extends ArrayAdapter<Weather> {
+        public WeatherAdapter(Context context, ArrayList<Weather> weathers) {
+            super(context, 0, weathers);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            Weather weather = getItem(position);
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.time_stamp_item, parent, false);
+            }
+
+            TextView dateInfo = convertView.findViewById(R.id.date_info);
+            ImageView weatherInfo = convertView.findViewById(R.id.weather_ico);
+            TextView tempInfo = convertView.findViewById(R.id.temp_text);
+
+            if (weather != null) {
+                ViewUtils.setTimeStamp(getResources(), dateInfo, weather.getDateStamp());
+                ViewUtils.setWeatherIcon(getContext(), weatherInfo, weather.getCondition().getIconName());
+                ViewUtils.setTemperatureInformation(getResources(), tempInfo, weather.getTemperature());
+            }
+            return convertView;
+        }
+    }
+
+    private void setupWeatherView() {
+        mWeatherTimesLayout.removeAllViews();
+        ArrayList<Weather> weathers = mForecastWeather.getWeathers();
+        WeatherAdapter marketsAdapter = new WeatherAdapter(getActivity(), weathers);
+        for (int i=1; i < weathers.size(); i++) {
+            View vi = marketsAdapter.getView(i, null, mWeatherTimesLayout);
+            mWeatherTimesLayout.addView(vi);
+        }
     }
 }
