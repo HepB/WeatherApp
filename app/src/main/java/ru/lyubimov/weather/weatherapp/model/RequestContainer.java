@@ -1,5 +1,6 @@
 package ru.lyubimov.weather.weatherapp.model;
 
+import android.content.res.Resources;
 import android.location.Location;
 
 import java.util.Locale;
@@ -10,7 +11,7 @@ import java.util.Locale;
 
 public class RequestContainer {
     private Location mLocation;
-    private Locale locale;
+    private Resources mResources;
 
     public Location getLocation() {
         return mLocation;
@@ -18,10 +19,10 @@ public class RequestContainer {
     public void setLocation(Location location) {
         mLocation = location;
     }
-    public Locale getLocale() {
-        return locale;
+    public Resources getResources() {
+        return mResources;
     }
-    public void setLocale(Locale locale) {
-        this.locale = locale;
+    public void setResources(Resources resources) {
+        this.mResources = resources;
     }
 }

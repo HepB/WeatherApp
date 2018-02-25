@@ -1,6 +1,5 @@
 package ru.lyubimov.weather.weatherapp;
 
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,6 +28,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
+import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 import ru.lyubimov.weather.weatherapp.model.Weather;
@@ -66,7 +66,6 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
@@ -92,14 +91,18 @@ public class WeatherFragment extends Fragment {
         if (!hasLocationPermission()) {
             requestPermissions(LOCATION_PERMISSIONS, REQUEST_LOCATION_PERMISSIONS);
         } else {
-            getLastLocation();
+            getLocationAndFetchWeatherData();
         }
     }
 
+    /**
+     * С помощью сервисов google play получаем данные о геолокации и на основе полученных данных
+     * формируем запрос в openweathermap.org
+     */
     @SuppressWarnings("MissingPermission")
-    private void getLastLocation() {
+    private void getLocationAndFetchWeatherData() {
         LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
         request.setNumUpdates(1);
         request.setInterval(0);
         mFusedLocationClient.getLastLocation()
@@ -109,7 +112,7 @@ public class WeatherFragment extends Fragment {
                         if (location != null) {
                             Log.i(TAG, "Got a fix: " + location);
                             RequestContainer container = new RequestContainer();
-                            container.setLocale(getResources().getConfiguration().locale);
+                            container.setResources(getResources());
                             container.setLocation(location);
                             new FetchWeatherTask().execute(container);
                         }
@@ -126,7 +129,7 @@ public class WeatherFragment extends Fragment {
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS:
                 if (hasLocationPermission()) {
-                    getLastLocation();
+                    getLocationAndFetchWeatherData();
                 } else {
                     Toast.makeText(getContext(), getString(R.string.permission_denied_explanation), Toast.LENGTH_LONG).show();
                 }
@@ -142,17 +145,26 @@ public class WeatherFragment extends Fragment {
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class FetchWeatherTask extends AsyncTask<RequestContainer, Void, ForecastWeather> {
+    private class FetchWeatherTask extends AsyncTask<RequestContainer, Void, AsyncTaskResult<ForecastWeather>> {
 
         @Override
-        protected ForecastWeather doInBackground(RequestContainer... containers) {
-            return new OpenWeatherMapFetcher().downloadWeather(containers[0]);
+        protected AsyncTaskResult<ForecastWeather> doInBackground(RequestContainer... containers) {
+            try {
+                ForecastWeather forecastWeather = new OpenWeatherMapFetcher().downloadWeather(containers[0]);
+                return new AsyncTaskResult<>(forecastWeather);
+            } catch (RuntimeException ex) {
+                return new AsyncTaskResult<>(ex);
+            }
         }
 
         @Override
-        protected void onPostExecute(ForecastWeather forecastWeather) {
-            mForecastWeather = forecastWeather;
-            updateUI();
+        protected void onPostExecute(AsyncTaskResult<ForecastWeather> result) {
+            if(result.getError() != null) {
+                Toast.makeText(getContext(), result.getError().getMessage(), Toast.LENGTH_LONG).show();
+            } else {
+                mForecastWeather = result.getResult();
+                updateUI();
+            }
         }
     }
 
@@ -175,10 +187,9 @@ public class WeatherFragment extends Fragment {
     }
 
     public class WeatherAdapter extends ArrayAdapter<Weather> {
-        public WeatherAdapter(Context context, ArrayList<Weather> weathers) {
+        WeatherAdapter(Context context, ArrayList<Weather> weathers) {
             super(context, 0, weathers);
         }
-
         @NonNull
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -201,6 +212,9 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    /**
+     * Формирование отображения погоды по временным отрезкам на 5 дней.
+     */
     private void setupWeatherView() {
         mWeatherTimesLayout.removeAllViews();
         ArrayList<Weather> weathers = mForecastWeather.getWeathers();

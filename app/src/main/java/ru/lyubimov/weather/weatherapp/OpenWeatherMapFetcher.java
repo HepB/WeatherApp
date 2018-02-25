@@ -19,11 +19,11 @@ import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
 /**
- * Для получения данных о погоде будем использовать открытый api openweathermap.org, бесплатная
+ * Для получения данных о погоде будем использовать открытый api openweathermap.org. Бесплатная
  * версия подразумевает функционал получения погоды на 5 дней, требуется регистрация и ключ.
  */
 
-public class OpenWeatherMapFetcher {
+class OpenWeatherMapFetcher {
     private static final String TAG = "CoinMarketCapFetcher";
 
     private static final Uri ENDPOINT = Uri.parse("http://api.openweathermap.org/data/2.5/forecast");
@@ -37,9 +37,9 @@ public class OpenWeatherMapFetcher {
      * @param container контейнер для запроса, содержащий локацию и локаль
      * @return погода с openweathermap.org
      */
-    public ForecastWeather downloadWeather(RequestContainer container) {
+    ForecastWeather downloadWeather(RequestContainer container) {
         Location location = container.getLocation();
-        Locale locale = container.getLocale();
+        Locale locale = container.getResources().getConfiguration().locale;
 
         ForecastWeather weather = null;
         double lat = location.getLatitude();
@@ -51,8 +51,10 @@ public class OpenWeatherMapFetcher {
             weather = parseItem(jsonString);
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to connect", ioe);
+            throw new RuntimeException(container.getResources().getString(R.string.no_internet_exception));
         } catch (JSONException jex) {
             Log.e(TAG, "Failed to fetch weather", jex);
+            throw new RuntimeException();
         }
         return weather;
     }
@@ -76,11 +78,11 @@ public class OpenWeatherMapFetcher {
         builder.
                 appendQueryParameter(LATITUDE, Double.toString(lat)).
                 appendQueryParameter(LONGITUDE, Double.toString(lon)).
-                //ключ правильнo было бы хранить в ресурсах, но т. к. исходники будут выкладываться в публичный репозиторий, добавим его хардкодом
+                //ключ правильнo было бы хранить в ресурсах, или хотя бы в константах
+                //но т. к. исходники будут выкладываться в публичный репозиторий, добавим его хардкодом
                 appendQueryParameter(API_KEY, "bebf456aa9257a2086ac7ea573cc9f77");
         return builder.build().toString();
     }
-
 
     private String getUrlString(double lat, double lon, String units, String locale) throws IOException {
         String completeUrl = buildUrl(lat, lon, units, locale);

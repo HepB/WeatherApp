@@ -2,7 +2,6 @@ package ru.lyubimov.weather.weatherapp;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,13 +13,19 @@ import java.util.Locale;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 
 /**
- * Created by Alex on 23.02.2018.
+ * Класс утилит для централизованной работы с View.
  */
 
-public class ViewUtils {
+class ViewUtils {
     private static final String TAG = "ViewUtils";
 
-    public static void setWindInformation(Resources resources, TextView windView, Weather.Wind wind) {
+    /**
+     * Метод для формирования во view данных о ветре
+     * @param resources ресурсы приложения. В них содерижтся информация о направлении ветра.
+     * @param windView view, отображающая данные о ветре.
+     * @param wind данные о ветре, полученные из внешнего api
+     */
+    static void setWindInformation(Resources resources, TextView windView, Weather.Wind wind) {
         StringBuilder inf = new StringBuilder();
         double deg = wind.getDeg();
         if ((deg >= 349 && deg < 360) || (deg > 0 && deg < 12)) {
@@ -47,13 +52,23 @@ public class ViewUtils {
         windView.setText(inf.toString());
     }
 
-    public static void setCloudsInformation(TextView cloudsView, Weather.Clouds clouds) {
-        StringBuilder inf = new StringBuilder();
-        inf.append(clouds.getCloudPercent()).append("%");
-        cloudsView.setText(inf.toString());
+    /**
+     * Метод для формирования во view данных об облаках (облачность в %)
+     * @param cloudsView view отображающая данные об облаках
+     * @param clouds данные об облачности, полученные из внешнего api
+     */
+    static void setCloudsInformation(TextView cloudsView, Weather.Clouds clouds) {
+        String inf = clouds.getCloudPercent() + "%";
+        cloudsView.setText(inf);
     }
 
-    public static void setTimeStamp(Resources resources, TextView timeView, long dateStampInSeconds) {
+    /**
+     * Метод для формирования во view данных о dateStamp из api
+     * @param resources ресурсы приложения, необходимы для получения local
+     * @param timeView view отображающая данные об облаках
+     * @param dateStampInSeconds значение dateStamp из api
+     */
+    static void setTimeStamp(Resources resources, TextView timeView, long dateStampInSeconds) {
         long timeInMills = dateStampInSeconds * 1000L; //время передается в секундах, переводим их в миллисекунды
         Date date = new Date(timeInMills);
         String format = "%1$ta %1$tR";
@@ -72,7 +87,14 @@ public class ViewUtils {
         timeView.setText(time);
     }
 
-    public static void setWeatherIcon(Context context, ImageView imageView, String iconName) {
+    /**
+     * Метод для поиска иконки погоды в ресурсах по имени, получаемому из api. Можно было бы получать
+     * иконки от openweathermap.org вторым запросом, однако, слишком много запросов не очень хорошо.
+     * @param context контекст приложения, необходим для поиска id иконки по имени.
+     * @param imageView view отображающая иконку
+     * @param iconName имя иконки получаемое из
+     */
+    static void setWeatherIcon(Context context, ImageView imageView, String iconName) {
         Resources resources = context.getResources();
         String fullName = "_" + iconName;
         Log.i(TAG, fullName);
@@ -80,7 +102,15 @@ public class ViewUtils {
         imageView.setImageDrawable(resources.getDrawable(resourceId));
     }
 
-    public static void setTemperatureInformation(Resources resources, TextView tempView, Weather.Temperature temp) {
+    /**
+     * Метод для формирования во view данных о температуре из api. Метод можно было бы улучшить, в зависимости
+     * от локали выставлять данные в c или f(в свою очередь формируя запрос необходимым образом). Однако, в рамках
+     * ограниченных сроков, оставим данную роработку на будущее.
+     * @param resources ресурсы приложения, необходимо для получения local
+     * @param tempView view отображающая данные об облаках
+     * @param temp
+     */
+    static void setTemperatureInformation(Resources resources, TextView tempView, Weather.Temperature temp) {
         String temperature = String.format(resources.getConfiguration().locale, "%.0f", temp.getTemp())
                 + "c" + (char) 0x00B0;
         tempView.setText(temperature);

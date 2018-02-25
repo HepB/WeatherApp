@@ -4,6 +4,9 @@
     <string name="no_location_detected">Местоположение не установлено. Убедитесь, что геолокация включена на устройстве</string>
     <string name="permission_rationale">Разрешение доступа к геолокации необходимо для корректнойработы программы.</string>
     <string name="permission_denied_explanation">Разрешение доступа к геолокации было отклонено,но оно необходимо для корректной работы программы.</string>
+    <string name="no_internet_exception">Нет соединения с интернетом. Убедитесь, что интернте включен на устройстве или попробуйте позже..</string>
+    <string name="parse_exception">Невозможно получить данные о погоде. Вероятно, проблема на стороне провайдера погоды, пожалуйста, попробуйте позже.</string>
+
     <string name="wind_speed">м/с</string>
 
     <string name="n">С</string>
