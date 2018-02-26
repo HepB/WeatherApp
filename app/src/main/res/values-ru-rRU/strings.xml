@@ -8,7 +8,7 @@
     <string name="parse_exception">Невозможно получить данные о погоде. Вероятно, проблема на стороне провайдера погоды, пожалуйста, попробуйте позже.</string>
 
     <string name="wind_speed">м/с</string>
-    <string name="coord_info">лат: %1f\nлон: %2f</string>
+    <string name="coord_info">шир: %1f\nдол: %2f</string>
 
     <string name="n">С</string>
     <string name="ne">СВ</string>
