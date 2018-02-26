@@ -1,6 +1,8 @@
 package ru.lyubimov.weather.weatherapp;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -13,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +30,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
@@ -49,6 +53,7 @@ public class WeatherFragment extends Fragment {
 
     private FusedLocationProviderClient mFusedLocationClient;
     private ForecastWeather mForecastWeather;
+    private Location mCurrentLocation;
 
     private ImageView mWeatherIco;
     private TextView mTemperature;
@@ -57,6 +62,7 @@ public class WeatherFragment extends Fragment {
     private TextView mWindInformation;
     private TextView mCloudsInformation;
     private TextView mTimeStamp;
+    private TextView mCoordInformation;
     private LinearLayout mWeatherTimesLayout;
 
     public static WeatherFragment newInstance() {
@@ -82,6 +88,7 @@ public class WeatherFragment extends Fragment {
         mTimeStamp = view.findViewById(R.id.date_stamp);
         mWeatherIco = view.findViewById(R.id.weather_ico);
         mWeatherTimesLayout = view.findViewById(R.id.five_day_times_layout);
+        mCoordInformation = view.findViewById(R.id.coord_view);
         return view;
     }
 
@@ -102,7 +109,7 @@ public class WeatherFragment extends Fragment {
     @SuppressWarnings("MissingPermission")
     private void getLocationAndFetchWeatherData() {
         LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         request.setNumUpdates(1);
         request.setInterval(0);
         mFusedLocationClient.getLastLocation()
@@ -111,6 +118,7 @@ public class WeatherFragment extends Fragment {
                     public void onSuccess(Location location) {
                         if (location != null) {
                             Log.i(TAG, "Got a fix: " + location);
+                            mCurrentLocation = location;
                             RequestContainer container = new RequestContainer();
                             container.setResources(getResources());
                             container.setLocation(location);
@@ -173,9 +181,24 @@ public class WeatherFragment extends Fragment {
 
         String cityName = mForecastWeather.getCity().getCityName();
         mCity.setText(cityName);
+        mCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (mCoordInformation.getVisibility()){
+                    case View.INVISIBLE:
+                        mCoordInformation.setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        mCoordInformation.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
 
         String weatherDescription = currentTimeWeather.getCondition().getDescription();
         mWeatherDescription.setText(weatherDescription);
+
+        String currentLocationInfo = getString(R.string.coord_info, mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        mCoordInformation.setText(currentLocationInfo);
 
         ViewUtils.setTemperatureInformation(getResources(), mTemperature, currentTimeWeather.getTemperature());
         ViewUtils.setWindInformation(getResources(), mWindInformation, currentTimeWeather.getWind());

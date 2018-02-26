@@ -8,6 +8,7 @@
     <string name="parse_exception">Can not get weather data. Maybe problems with the weather provider, please try again later.</string>
 
     <string name="wind_speed">m/s</string>
+    <string name="coord_info">lat: %1f\nlon: %2f</string>
 
     <string name="n">N</string>
     <string name="ne">NE</string>
