@@ -3,8 +3,6 @@ package ru.lyubimov.weather.weatherapp.model;
 import android.content.res.Resources;
 import android.location.Location;
 
-import java.util.Locale;
-
 /**
  * Created by Alex on 23.02.2018.
  */

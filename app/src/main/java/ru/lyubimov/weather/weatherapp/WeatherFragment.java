@@ -1,8 +1,6 @@
 package ru.lyubimov.weather.weatherapp;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -15,7 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -30,7 +27,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
