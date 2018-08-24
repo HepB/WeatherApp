@@ -26,4 +26,6 @@
     <string name="msk">Москва</string>
     <string name="spb">Лондон</string>
     <string name="refresh_data">Обновить данные</string>
+
+    <string name="delete">Удалить</string>
 </resources>

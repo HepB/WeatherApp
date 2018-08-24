@@ -6,6 +6,7 @@
 
     <color name="colorLightGray">#DDDDDD</color>
     <color name="colorGray">#999999</color>
+    <color name="colorRowSelected">#6dccfa</color>
     <color name="colorBackgroundDay">#4aabda</color>
     <color name="colorBackgroundNight">#2a8bba</color>
     <color name="colorWhite">#FFFFFF</color>
