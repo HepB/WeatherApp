@@ -8,6 +8,7 @@ import android.location.Location;
  */
 
 public class RequestContainer {
+    private String cityName;
     private Location mLocation;
     private Resources mResources;
 
@@ -22,5 +23,11 @@ public class RequestContainer {
     }
     public void setResources(Resources resources) {
         this.mResources = resources;
+    }
+    public String getCityName() {
+        return cityName;
+    }
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 }

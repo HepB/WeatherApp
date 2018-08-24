@@ -28,6 +28,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
+import ru.lyubimov.weather.weatherapp.fetcher.FetcherByGeo;
+import ru.lyubimov.weather.weatherapp.fetcher.WeatherFetcher;
 import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
@@ -60,6 +62,8 @@ public class WeatherFragment extends Fragment {
     private TextView mTimeStamp;
     private TextView mCoordInformation;
     private LinearLayout mWeatherTimesLayout;
+
+    private WeatherFetcher weatherFetcher;
 
     public static WeatherFragment newInstance() {
         return new WeatherFragment();
@@ -118,6 +122,7 @@ public class WeatherFragment extends Fragment {
                             RequestContainer container = new RequestContainer();
                             container.setResources(getResources());
                             container.setLocation(location);
+                            weatherFetcher = new FetcherByGeo();
                             new FetchWeatherTask().execute(container);
                         }
                         else {
@@ -154,7 +159,7 @@ public class WeatherFragment extends Fragment {
         @Override
         protected AsyncTaskResult<ForecastWeather> doInBackground(RequestContainer... containers) {
             try {
-                ForecastWeather forecastWeather = new OpenWeatherMapFetcher().downloadWeather(containers[0]);
+                ForecastWeather forecastWeather = weatherFetcher.downloadWeather(containers[0]);
                 return new AsyncTaskResult<>(forecastWeather);
             } catch (RuntimeException ex) {
                 return new AsyncTaskResult<>(ex);
