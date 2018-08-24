@@ -22,4 +22,8 @@
     <string name="wind_icon">Иконка ветра</string>
     <string name="cloud_icon">Иконка облаков</string>
     <string name="weather_icon">Иконка погоды</string>
+
+    <string name="msk">Москва</string>
+    <string name="spb">Лондон</string>
+    <string name="refresh_data">Обновить данные</string>
 </resources>

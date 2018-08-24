@@ -14,6 +14,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -27,6 +30,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
+import ru.lyubimov.weather.weatherapp.fetcher.FetchByCity;
 import ru.lyubimov.weather.weatherapp.fetcher.FetcherByGeo;
 import ru.lyubimov.weather.weatherapp.fetcher.WeatherFetcher;
 import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
@@ -73,6 +77,8 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //т. к. в данном случае у нас не Activity, а Fragment, необходимо вызывать метод setHasOptionsMenu()
+        setHasOptionsMenu(true);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
@@ -126,8 +132,7 @@ public class WeatherFragment extends Fragment {
                             container.setLocation(location);
                             mWeatherFetcher = new FetcherByGeo();
                             new FetchWeatherTask().execute(container);
-                        }
-                        else {
+                        } else {
                             Toast.makeText(getContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
                         }
                     }
@@ -170,7 +175,7 @@ public class WeatherFragment extends Fragment {
 
         @Override
         protected void onPostExecute(AsyncTaskResult<ForecastWeather> result) {
-            if(result.getError() != null) {
+            if (result.getError() != null) {
                 Toast.makeText(getContext(), result.getError().getMessage(), Toast.LENGTH_LONG).show();
             } else {
                 mForecastWeather = result.getResult();
@@ -187,7 +192,7 @@ public class WeatherFragment extends Fragment {
         mCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (mCoordInformation.getVisibility()){
+                switch (mCoordInformation.getVisibility()) {
                     case View.INVISIBLE:
                         mCoordInformation.setVisibility(View.VISIBLE);
                         break;
@@ -212,7 +217,6 @@ public class WeatherFragment extends Fragment {
         setupWeathersView();
     }
 
-
     /**
      * Формирование отображения погоды по временным отрезкам на 5 дней.
      */
@@ -222,6 +226,36 @@ public class WeatherFragment extends Fragment {
         if (isAdded()) {
             mWeatherAdapter = new WeatherAdapter(weathers, getActivity());
             mWeatherTimesLayout.setAdapter(mWeatherAdapter);
+        }
+    }
+
+    //Домашнее задание к первому уроку
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.main_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        RequestContainer container = new RequestContainer();
+        container.setResources(getResources());
+        switch (item.getItemId()) {
+            case R.id.menu_refresh_data:
+                getLocationAndFetchWeatherData();
+                return true;
+            case R.id.menu_fetch_msk:
+                container.setCityName("Moscow,RU");
+                mWeatherFetcher = new FetchByCity();
+                new FetchWeatherTask().execute(container);
+                return true;
+            case R.id.menu_fetch_spb:
+                container.setCityName("London,UK");
+                mWeatherFetcher = new FetchByCity();
+                new FetchWeatherTask().execute(container);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
