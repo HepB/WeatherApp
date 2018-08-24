@@ -13,7 +13,7 @@
         android:title="@string/msk"
         app:showAsAction="never" />
     <item
-        android:id="@+id/menu_fetch_spb"
+        android:id="@+id/menu_fetch_lnd"
         android:icon="@android:drawable/ic_notification_clear_all"
         android:title="@string/spb"
         app:showAsAction="never" />

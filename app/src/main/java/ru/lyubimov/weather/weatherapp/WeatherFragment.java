@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +65,6 @@ public class WeatherFragment extends Fragment {
     private TextView mWindInformation;
     private TextView mCloudsInformation;
     private TextView mTimeStamp;
-    private TextView mCoordInformation;
     private RecyclerView mWeatherTimesLayout;
 
     private WeatherFetcher mWeatherFetcher;
@@ -94,7 +94,6 @@ public class WeatherFragment extends Fragment {
         mCloudsInformation = view.findViewById(R.id.clouds);
         mTimeStamp = view.findViewById(R.id.date_stamp);
         mWeatherIco = view.findViewById(R.id.weather_ico);
-        mCoordInformation = view.findViewById(R.id.coord_view);
         mWeatherTimesLayout = view.findViewById(R.id.five_day_times_layout);
         mWeatherTimesLayout.setLayoutManager(new LinearLayoutManager(getActivity()));
         return view;
@@ -189,24 +188,10 @@ public class WeatherFragment extends Fragment {
 
         String cityName = mForecastWeather.getCity().getCityName();
         mCity.setText(cityName);
-        mCity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (mCoordInformation.getVisibility()) {
-                    case View.INVISIBLE:
-                        mCoordInformation.setVisibility(View.VISIBLE);
-                        break;
-                    default:
-                        mCoordInformation.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
+        addPopup();
 
         String weatherDescription = currentTimeWeather.getCondition().getDescription();
         mWeatherDescription.setText(weatherDescription);
-
-        String currentLocationInfo = getString(R.string.coord_info, mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        mCoordInformation.setText(currentLocationInfo);
 
         ViewUtils.setTemperatureInformation(getResources(), mTemperature, currentTimeWeather.getTemperature());
         ViewUtils.setWindInformation(getResources(), mWindInformation, currentTimeWeather.getWind());
@@ -249,7 +234,7 @@ public class WeatherFragment extends Fragment {
                 mWeatherFetcher = new FetchByCity();
                 new FetchWeatherTask().execute(container);
                 return true;
-            case R.id.menu_fetch_spb:
+            case R.id.menu_fetch_lnd:
                 container.setCityName("London,UK");
                 mWeatherFetcher = new FetchByCity();
                 new FetchWeatherTask().execute(container);
@@ -257,5 +242,37 @@ public class WeatherFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void addPopup() {
+        mCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(getContext(), v);
+                popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        RequestContainer container = new RequestContainer();
+                        container.setResources(getResources());
+                        switch (item.getItemId()) {
+                            case R.id.menu_fetch_msk:
+                                container.setCityName("Moscow,RU");
+                                mWeatherFetcher = new FetchByCity();
+                                new FetchWeatherTask().execute(container);
+                                return true;
+                            case R.id.menu_fetch_lnd:
+                                container.setCityName("London,UK");
+                                mWeatherFetcher = new FetchByCity();
+                                new FetchWeatherTask().execute(container);
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popupMenu.show();
+            }
+        });
     }
 }
