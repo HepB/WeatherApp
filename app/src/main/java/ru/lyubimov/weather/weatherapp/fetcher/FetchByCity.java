@@ -12,8 +12,6 @@ import ru.lyubimov.weather.weatherapp.R;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
-import static android.provider.ContactsContract.CommonDataKinds.StructuredPostal.CITY;
-
 public class FetchByCity extends OpenWeatherMapFetcher {
     private static final String TAG = "FetchByCity";
     private static final String CITY = "q";

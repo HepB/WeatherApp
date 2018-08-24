@@ -22,7 +22,7 @@ public class FetcherByGeo extends OpenWeatherMapFetcher {
         Location location = container.getLocation();
         Locale locale = container.getResources().getConfiguration().locale;
 
-        ForecastWeather weather = null;
+        ForecastWeather weather;
         double lat = location.getLatitude();
         double lon = location.getLongitude();
         String country = locale.getCountry();
