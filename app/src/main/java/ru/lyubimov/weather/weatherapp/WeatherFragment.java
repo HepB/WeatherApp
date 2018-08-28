@@ -30,6 +30,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
+import java.util.Objects;
 
 import ru.lyubimov.weather.weatherapp.fetcher.FetchByCity;
 import ru.lyubimov.weather.weatherapp.fetcher.FetcherByGeo;
@@ -184,20 +185,20 @@ public class WeatherFragment extends Fragment {
     }
 
     private void updateUI() {
-        Weather currentTimeWeather = mForecastWeather.getWeathers().get(0);
+        Weather currentTimeWeather = Objects.requireNonNull(mForecastWeather.getWeathers()).get(0);
 
-        String cityName = mForecastWeather.getCity().getCityName();
+        String cityName = Objects.requireNonNull(mForecastWeather.getCity()).getCityName();
         mCity.setText(cityName);
         addPopup();
 
-        String weatherDescription = currentTimeWeather.getCondition().getDescription();
+        String weatherDescription = Objects.requireNonNull(currentTimeWeather.getConditions()).get(0).getDescription();
         mWeatherDescription.setText(weatherDescription);
 
-        ViewUtils.setTemperatureInformation(getResources(), mTemperature, currentTimeWeather.getTemperature());
-        ViewUtils.setWindInformation(getResources(), mWindInformation, currentTimeWeather.getWind());
-        ViewUtils.setCloudsInformation(mCloudsInformation, currentTimeWeather.getClouds());
+        ViewUtils.setTemperatureInformation(getResources(), mTemperature, Objects.requireNonNull(currentTimeWeather.getTemperature()));
+        ViewUtils.setWindInformation(getResources(), mWindInformation, Objects.requireNonNull(currentTimeWeather.getWind()));
+        ViewUtils.setCloudsInformation(mCloudsInformation, Objects.requireNonNull(currentTimeWeather.getClouds()));
         ViewUtils.setTimeStamp(getResources(), mTimeStamp, currentTimeWeather.getDateStamp());
-        ViewUtils.setWeatherIcon(getContext(), mWeatherIco, currentTimeWeather.getCondition().getIconName());
+        ViewUtils.setWeatherIcon(Objects.requireNonNull(getContext()), mWeatherIco, currentTimeWeather.getConditions().get(0).getIconName());
 
         setupWeathersView();
     }

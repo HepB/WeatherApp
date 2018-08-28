@@ -93,7 +93,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
         private TextView mTempInfo;
         private ConstraintLayout mLayout;
 
-        WeatherHolder(LayoutInflater inflater, ViewGroup parent) {
+        private WeatherHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.time_stamp_item, parent, false));
             mDateInfo = itemView.findViewById(R.id.date_info);
             mWeatherInfo = itemView.findViewById(R.id.weather_ico);
@@ -101,10 +101,10 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             mLayout = itemView.findViewById(R.id.layout);
         }
 
-        void bind(final Weather weather) {
+        private void bind(final Weather weather) {
             mWeather = weather;
             ViewUtils.setTimeStamp(activity.getResources(), mDateInfo, mWeather.getDateStamp());
-            ViewUtils.setWeatherIcon(activity.getApplicationContext(), mWeatherInfo, mWeather.getCondition().getIconName());
+            ViewUtils.setWeatherIcon(activity.getApplicationContext(), mWeatherInfo, mWeather.getConditions().get(0).getIconName());
             ViewUtils.setTemperatureInformation(activity.getResources(), mTempInfo, mWeather.getTemperature());
 
             if (selectedItems.contains(weather)) {
@@ -130,7 +130,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             });
         }
 
-        void selectItem(Weather weather) {
+        private void selectItem(Weather weather) {
             if (multiSelect) {
                 if (selectedItems.contains(weather)) {
                     selectedItems.remove(weather);

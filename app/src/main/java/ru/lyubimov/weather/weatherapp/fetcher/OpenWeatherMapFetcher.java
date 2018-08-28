@@ -36,6 +36,8 @@ abstract class OpenWeatherMapFetcher implements WeatherFetcher{
     public abstract ForecastWeather downloadWeather(RequestContainer container);
 
     /**
+     * Здесь и далее приватность выбрана default, т к. подразумевается, что все реализации фетчера будут
+     * лежать в пакете fetcher, т. к. package более закрытый, чем protected.
      * @param urlSpec строка для запроса
      * @return массив байт, содержащий данные из сети
      * @throws IOException пробрасывается исключение в случае отсутствия подключения

@@ -10,13 +10,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import ru.lyubimov.weather.weatherapp.model.Weather;
+import ru.lyubimov.weather.weatherapp.model.Clouds;
+import ru.lyubimov.weather.weatherapp.model.Temperature;
+import ru.lyubimov.weather.weatherapp.model.Wind;
 
 /**
  * Класс утилит для централизованной работы с View.
  */
 
 public class ViewUtils {
+
+    private ViewUtils(){}
+
     private static final String TAG = "ViewUtils";
 
     /**
@@ -25,7 +30,7 @@ public class ViewUtils {
      * @param windView view, отображающая данные о ветре.
      * @param wind данные о ветре, полученные из внешнего api
      */
-    public static void setWindInformation(Resources resources, TextView windView, Weather.Wind wind) {
+    public static void setWindInformation(Resources resources, TextView windView, Wind wind) {
         StringBuilder inf = new StringBuilder();
         double deg = wind.getDeg();
         if ((deg >= 349 && deg < 360) || (deg > 0 && deg < 12)) {
@@ -57,7 +62,7 @@ public class ViewUtils {
      * @param cloudsView view отображающая данные об облаках
      * @param clouds данные об облачности, полученные из внешнего api
      */
-    public static void setCloudsInformation(TextView cloudsView, Weather.Clouds clouds) {
+    public static void setCloudsInformation(TextView cloudsView, Clouds clouds) {
         String inf = clouds.getCloudPercent() + "%";
         cloudsView.setText(inf);
     }
@@ -110,7 +115,7 @@ public class ViewUtils {
      * @param tempView view отображающая данные об облаках
      * @param temp
      */
-    public static void setTemperatureInformation(Resources resources, TextView tempView, Weather.Temperature temp) {
+    public static void setTemperatureInformation(Resources resources, TextView tempView, Temperature temp) {
         String temperature = String.format(resources.getConfiguration().locale, "%.0f", temp.getTemp())
                 + "c" + (char) 0x00B0;
         tempView.setText(temperature);
