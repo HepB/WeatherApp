@@ -65,7 +65,6 @@ public class WeatherFragment extends Fragment {
     private TextView mWeatherDescription;
     private TextView mWindInformation;
     private TextView mCloudsInformation;
-    private TextView mTimeStamp;
     private RecyclerView mWeatherTimesLayout;
 
     private WeatherFetcher mWeatherFetcher;
@@ -93,7 +92,6 @@ public class WeatherFragment extends Fragment {
         mWeatherDescription = view.findViewById(R.id.weather_description);
         mWindInformation = view.findViewById(R.id.wind);
         mCloudsInformation = view.findViewById(R.id.clouds);
-        mTimeStamp = view.findViewById(R.id.date_stamp);
         mWeatherIco = view.findViewById(R.id.weather_ico);
         mWeatherTimesLayout = view.findViewById(R.id.five_day_times_layout);
         mWeatherTimesLayout.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -197,7 +195,6 @@ public class WeatherFragment extends Fragment {
         ViewUtils.setTemperatureInformation(getResources(), mTemperature, Objects.requireNonNull(currentTimeWeather.getTemperature()));
         ViewUtils.setWindInformation(getResources(), mWindInformation, Objects.requireNonNull(currentTimeWeather.getWind()));
         ViewUtils.setCloudsInformation(mCloudsInformation, Objects.requireNonNull(currentTimeWeather.getClouds()));
-        ViewUtils.setTimeStamp(getResources(), mTimeStamp, currentTimeWeather.getDateStamp());
         ViewUtils.setWeatherIcon(Objects.requireNonNull(getContext()), mWeatherIco, currentTimeWeather.getConditions().get(0).getIconName());
 
         setupWeathersView();

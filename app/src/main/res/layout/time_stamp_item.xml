@@ -9,7 +9,7 @@
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/colorBackgroundDay">
+        style="@style/AppTheme.WeatherItemTheme">
 
         <ImageView
             android:id="@+id/weather_ico"
