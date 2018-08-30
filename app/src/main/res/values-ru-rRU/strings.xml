@@ -27,5 +27,10 @@
     <string name="spb">Лондон</string>
     <string name="refresh_data">Обновить данные</string>
 
+    <string name="about_developer">О разработчике</string>
+    <string name="about_city">О городе</string>
+    <string name="about_temperature">О температуре</string>
+
     <string name="delete">Удалить</string>
+
 </resources>
