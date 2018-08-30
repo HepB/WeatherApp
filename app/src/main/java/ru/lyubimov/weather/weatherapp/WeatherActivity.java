@@ -48,7 +48,7 @@ import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
  * Created by Alex on 13.12.2017.
  */
 
-public class WeatherActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class WeatherActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "WeatherActivity";
 
@@ -107,7 +107,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
     public void onStart() {
         super.onStart();
         if (!hasLocationPermission()) {
-            ActivityCompat.requestPermissions(this,LOCATION_PERMISSIONS, REQUEST_LOCATION_PERMISSIONS);
+            ActivityCompat.requestPermissions(this, LOCATION_PERMISSIONS, REQUEST_LOCATION_PERMISSIONS);
         } else {
             getLocationAndFetchWeatherData();
         }
@@ -286,19 +286,24 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
         // Handle navigation view item clicks here
         int id = item.getItemId();
 
-        if (id == R.id.about_dev) {
-            Snackbar.make(getWindow().getDecorView(), "Родился, живу.", Snackbar.LENGTH_LONG)
-                   .show();
-        } else if (id == R.id.about_city) {
-            Snackbar.make(getWindow().getDecorView(), mForecastWeather.getCity().getCityName() + ", Lat: " +
-                     mForecastWeather.getCity().getCoordinate().getLatitude() +
-                    " Lon :" + mForecastWeather.getCity().getCoordinate().getLatitude(), Snackbar.LENGTH_LONG)
-                    .show();
-        } else if (id == R.id.about_temp) {
-            Snackbar.make(getWindow().getDecorView(),
-                    "Min: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMin() + "c, "
-                            + "Max: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMax() + "c", Snackbar.LENGTH_LONG)
-                    .show();
+        switch (id) {
+            case R.id.about_dev:
+                Snackbar.make(getWindow().getDecorView(), "Родился, живу.", Snackbar.LENGTH_LONG).show();
+                break;
+            case R.id.about_city:
+                Snackbar.make(getWindow().getDecorView(), mForecastWeather.getCity().getCityName() + ", Lat: " +
+                        mForecastWeather.getCity().getCoordinate().getLatitude() +
+                        " Lon :" + mForecastWeather.getCity().getCoordinate().getLongitude(), Snackbar.LENGTH_LONG)
+                        .show();
+                break;
+            case R.id.about_temp:
+                Snackbar.make(getWindow().getDecorView(),
+                        "Min: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMin() + "c, "
+                                + "Max: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMax() + "c", Snackbar.LENGTH_LONG)
+                        .show();
+                break;
+            default:
+                Log.d(TAG, "Wrong button id");
         }
 
         // закрываем NavigationView, параметр определяет анимацию закрытия

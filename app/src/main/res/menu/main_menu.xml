@@ -5,7 +5,7 @@
         android:id="@+id/menu_refresh_data"
         android:icon="@android:drawable/ic_menu_rotate"
         android:title="@string/refresh_data"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
          />
     <item
         android:id="@+id/menu_fetch_msk"
