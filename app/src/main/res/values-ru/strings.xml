@@ -33,7 +33,6 @@
     <string name="about_temperature">О температуре</string>
 
     <string name="delete">Удалить</string>
-    <string name="city_text_field">Город</string>
     <string name="dialog_description">Попробуйте узнать погоду по названию города</string>
     <string name="find">Найти</string>
     <string name="cancel">Отмена</string>

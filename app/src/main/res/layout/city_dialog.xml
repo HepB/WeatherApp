@@ -26,7 +26,6 @@
         android:layout_gravity="center_horizontal"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="@string/city_text_field"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"

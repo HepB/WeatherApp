@@ -36,7 +36,6 @@
     <string name="about_temperature">About temperature</string>
 
     <string name="action_settings">Settings</string>
-    <string name="city_text_field">City</string>
     <string name="dialog_description">Try to find weather by city</string>
     <string name="find">Find</string>
     <string name="cancel">Cancel</string>
