@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_refresh_data"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="@string/refresh_data"
+        app:showAsAction="ifRoom"
+         />
+    <item
+        android:id="@+id/menu_fetch_city"
+        android:icon="@android:drawable/ic_notification_clear_all"
+        android:title="@string/find_by_city"
+        app:showAsAction="never" />
+</menu>

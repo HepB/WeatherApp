@@ -10,13 +10,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import ru.lyubimov.weather.weatherapp.model.Weather;
+import ru.lyubimov.weather.weatherapp.model.Clouds;
+import ru.lyubimov.weather.weatherapp.model.Temperature;
+import ru.lyubimov.weather.weatherapp.model.Wind;
 
 /**
  * Класс утилит для централизованной работы с View.
  */
 
-class ViewUtils {
+public class ViewUtils {
+
+    private ViewUtils(){}
+
     private static final String TAG = "ViewUtils";
 
     /**
@@ -25,7 +30,7 @@ class ViewUtils {
      * @param windView view, отображающая данные о ветре.
      * @param wind данные о ветре, полученные из внешнего api
      */
-    static void setWindInformation(Resources resources, TextView windView, Weather.Wind wind) {
+    public static void setWindInformation(Resources resources, TextView windView, Wind wind) {
         StringBuilder inf = new StringBuilder();
         double deg = wind.getDeg();
         if ((deg >= 349 && deg < 360) || (deg > 0 && deg < 12)) {
@@ -57,7 +62,7 @@ class ViewUtils {
      * @param cloudsView view отображающая данные об облаках
      * @param clouds данные об облачности, полученные из внешнего api
      */
-    static void setCloudsInformation(TextView cloudsView, Weather.Clouds clouds) {
+    public static void setCloudsInformation(TextView cloudsView, Clouds clouds) {
         String inf = clouds.getCloudPercent() + "%";
         cloudsView.setText(inf);
     }
@@ -68,7 +73,7 @@ class ViewUtils {
      * @param timeView view отображающая данные об облаках
      * @param dateStampInSeconds значение dateStamp из api
      */
-    static void setTimeStamp(Resources resources, TextView timeView, long dateStampInSeconds) {
+    public static void setTimeStamp(Resources resources, TextView timeView, long dateStampInSeconds) {
         long timeInMills = dateStampInSeconds * 1000L; //время передается в секундах, переводим их в миллисекунды
         Date date = new Date(timeInMills);
         String format = "%1$ta %1$tR";
@@ -94,7 +99,7 @@ class ViewUtils {
      * @param imageView view отображающая иконку
      * @param iconName имя иконки получаемое из
      */
-    static void setWeatherIcon(Context context, ImageView imageView, String iconName) {
+    public static void setWeatherIcon(Context context, ImageView imageView, String iconName) {
         Resources resources = context.getResources();
         String fullName = "_" + iconName;
         Log.i(TAG, fullName);
@@ -110,7 +115,7 @@ class ViewUtils {
      * @param tempView view отображающая данные об облаках
      * @param temp
      */
-    static void setTemperatureInformation(Resources resources, TextView tempView, Weather.Temperature temp) {
+    public static void setTemperatureInformation(Resources resources, TextView tempView, Temperature temp) {
         String temperature = String.format(resources.getConfiguration().locale, "%.0f", temp.getTemp())
                 + "c" + (char) 0x00B0;
         tempView.setText(temperature);
