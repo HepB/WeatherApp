@@ -4,12 +4,12 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -32,13 +33,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import ru.lyubimov.weather.weatherapp.fetcher.FetchByCity;
-import ru.lyubimov.weather.weatherapp.fetcher.FetcherByGeo;
-import ru.lyubimov.weather.weatherapp.fetcher.WeatherFetcher;
-import ru.lyubimov.weather.weatherapp.model.AsyncTaskResult;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
+import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
+import ru.lyubimov.weather.weatherapp.fetcher.retrofit.OpenWeatherMapRetroFetcher;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 import ru.lyubimov.weather.weatherapp.model.Weather;
@@ -48,7 +50,10 @@ import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
  * Created by Alex on 13.12.2017.
  */
 
-public class WeatherActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class WeatherActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener,
+        SingleObserver<ForecastWeather>,
+        ChangeCityDialogFragment.ChangeCityDialogListener{
 
     private static final String TAG = "WeatherActivity";
 
@@ -71,7 +76,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
     private RecyclerView mWeatherTimesLayout;
     private DrawerLayout mDrawer;
 
-    private WeatherFetcher mWeatherFetcher;
+    private List<Disposable> mDisposables;
+    private WeatherGetter mWeatherGetter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,6 +107,15 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
 
         NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+        mWeatherGetter = new OpenWeatherMapRetroFetcher();
+    }
+
+    @Override
+    protected void onDestroy() {
+        for (Disposable disposable : mDisposables) {
+            disposable.dispose();
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -128,8 +143,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
                             RequestContainer container = new RequestContainer();
                             container.setResources(getResources());
                             container.setLocation(location);
-                            mWeatherFetcher = new FetcherByGeo();
-                            new FetchWeatherTask().execute(container);
+                            //subscribe(container, new CallableWeatherGetter(new FetcherByGeo()));
+                            subscribe(container, mWeatherGetter);
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
                         }
@@ -156,30 +171,6 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
     private boolean hasLocationPermission() {
         int result = ContextCompat.checkSelfPermission(this, LOCATION_PERMISSIONS[0]);
         return result == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class FetchWeatherTask extends AsyncTask<RequestContainer, Void, AsyncTaskResult<ForecastWeather>> {
-
-        @Override
-        protected AsyncTaskResult<ForecastWeather> doInBackground(RequestContainer... containers) {
-            try {
-                ForecastWeather forecastWeather = mWeatherFetcher.downloadWeather(containers[0]);
-                return new AsyncTaskResult<>(forecastWeather);
-            } catch (RuntimeException ex) {
-                return new AsyncTaskResult<>(ex);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(AsyncTaskResult<ForecastWeather> result) {
-            if (result.getError() != null) {
-                Toast.makeText(getApplicationContext(), result.getError().getMessage(), Toast.LENGTH_LONG).show();
-            } else {
-                mForecastWeather = result.getResult();
-                updateUI();
-            }
-        }
     }
 
     private void updateUI() {
@@ -225,15 +216,9 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
             case R.id.menu_refresh_data:
                 getLocationAndFetchWeatherData();
                 return true;
-            case R.id.menu_fetch_msk:
-                container.setCityName("Moscow,RU");
-                mWeatherFetcher = new FetchByCity();
-                new FetchWeatherTask().execute(container);
-                return true;
-            case R.id.menu_fetch_lnd:
-                container.setCityName("London,UK");
-                mWeatherFetcher = new FetchByCity();
-                new FetchWeatherTask().execute(container);
+            case R.id.menu_fetch_city:
+                ChangeCityDialogFragment cityDialogFragment = new ChangeCityDialogFragment();
+                cityDialogFragment.show(getSupportFragmentManager(), "ChangeCityDialogFragment");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -254,13 +239,13 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
                         switch (item.getItemId()) {
                             case R.id.menu_fetch_msk:
                                 container.setCityName("Moscow,RU");
-                                mWeatherFetcher = new FetchByCity();
-                                new FetchWeatherTask().execute(container);
+                                //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
+                                subscribe(container, mWeatherGetter);
                                 return true;
                             case R.id.menu_fetch_lnd:
                                 container.setCityName("London,UK");
-                                mWeatherFetcher = new FetchByCity();
-                                new FetchWeatherTask().execute(container);
+                                //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
+                                subscribe(container, mWeatherGetter);
                                 return true;
                             default:
                                 return false;
@@ -309,5 +294,46 @@ public class WeatherActivity extends AppCompatActivity implements NavigationView
         // закрываем NavigationView, параметр определяет анимацию закрытия
         mDrawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void subscribe(RequestContainer container, WeatherGetter getter) {
+        getter.getWeatherResult(container).subscribe(this);
+    }
+
+    @Override
+    public void onSubscribe(Disposable d) {
+        if (mDisposables == null) {
+            mDisposables = new ArrayList<>();
+        }
+        mDisposables.add(d);
+    }
+
+    @Override
+    public void onSuccess(ForecastWeather weather) {
+        mForecastWeather = weather;
+        updateUI();
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        Log.e(TAG, t.getMessage());
+    }
+
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        EditText editText = dialog.getDialog().findViewById(R.id.edit_city_name);
+        String cityName = editText.getText().toString();
+        RequestContainer container = new RequestContainer();
+        container.setResources(getResources());
+        container.setCityName(cityName);
+        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
+        subscribe(container, mWeatherGetter);
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        dialog.getDialog().cancel();
     }
 }

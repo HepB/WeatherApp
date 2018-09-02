@@ -23,6 +23,7 @@
     <string name="cloud_icon">Иконка облаков</string>
     <string name="weather_icon">Иконка погоды</string>
 
+    <string name="find_by_city">Найти по названию города</string>
     <string name="msk">Москва</string>
     <string name="spb">Лондон</string>
     <string name="refresh_data">Обновить данные</string>
@@ -32,5 +33,12 @@
     <string name="about_temperature">О температуре</string>
 
     <string name="delete">Удалить</string>
+    <string name="city_text_field">Город</string>
+    <string name="dialog_description">Попробуйте узнать погоду по названию города</string>
+    <string name="find">Найти</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="weather_key">bebf456aa9257a2086ac7ea573cc9f77</string>
+    <string name="metric">metric</string>
 
 </resources>

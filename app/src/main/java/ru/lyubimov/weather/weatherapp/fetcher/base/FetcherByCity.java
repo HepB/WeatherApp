@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher;
+package ru.lyubimov.weather.weatherapp.fetcher.base;
 
 import android.net.Uri;
 import android.util.Log;
@@ -12,8 +12,8 @@ import ru.lyubimov.weather.weatherapp.R;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
-public class FetchByCity extends OpenWeatherMapFetcher {
-    private static final String TAG = "FetchByCity";
+public class FetcherByCity extends OpenWeatherMapBaseFetcher {
+    private static final String TAG = "FetcherByCity";
     private static final String CITY = "q";
 
     @Override

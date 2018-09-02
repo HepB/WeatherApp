@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher;
+package ru.lyubimov.weather.weatherapp.fetcher.base;
 
 import android.location.Location;
 import android.net.Uri;
@@ -13,7 +13,7 @@ import ru.lyubimov.weather.weatherapp.R;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
-public class FetcherByGeo extends OpenWeatherMapFetcher {
+public class FetcherByGeo extends OpenWeatherMapBaseFetcher {
     private static final String TAG = "FetcherByGeo";
     private static final String LATITUDE = "lat";
     private static final String LONGITUDE = "lon";

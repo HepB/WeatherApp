@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher;
+package ru.lyubimov.weather.weatherapp.fetcher.base;
 
 import android.net.Uri;
 import android.util.Log;
@@ -14,26 +14,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
-import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
 /**
  * Для получения данных о погоде будем использовать открытый api openweathermap.org. Бесплатная
  * версия подразумевает функционал получения погоды на 5 дней, требуется регистрация и ключ.
  */
 
-abstract class OpenWeatherMapFetcher implements WeatherFetcher{
+abstract class OpenWeatherMapBaseFetcher implements WeatherFetcher {
     private static final String TAG = "OpenWeatherMapFetcher";
 
     static final Uri ENDPOINT = Uri.parse("http://api.openweathermap.org/data/2.5/forecast");
     static final String UNITS = "units";
     static final String LANG = "lang";
     static final String API_KEY = "appid";
-
-    /**
-     * @param container контейнер для запроса, содержащий локацию и локаль
-     * @return погода с openweathermap.org
-     */
-    public abstract ForecastWeather downloadWeather(RequestContainer container);
 
     /**
      * Здесь и далее приватность выбрана default, т к. подразумевается, что все реализации фетчера будут

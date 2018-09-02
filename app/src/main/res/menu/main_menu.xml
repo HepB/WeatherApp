@@ -8,13 +8,8 @@
         app:showAsAction="ifRoom"
          />
     <item
-        android:id="@+id/menu_fetch_msk"
+        android:id="@+id/menu_fetch_city"
         android:icon="@android:drawable/ic_notification_clear_all"
-        android:title="@string/msk"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/menu_fetch_lnd"
-        android:icon="@android:drawable/ic_notification_clear_all"
-        android:title="@string/spb"
+        android:title="@string/find_by_city"
         app:showAsAction="never" />
 </menu>
