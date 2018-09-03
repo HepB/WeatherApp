@@ -217,7 +217,7 @@ public class WeatherActivity extends AppCompatActivity implements
                 getLocationAndFetchWeatherData();
                 return true;
             case R.id.menu_fetch_city:
-                ChangeCityDialogFragment cityDialogFragment = new ChangeCityDialogFragment();
+                DialogFragment cityDialogFragment = ChangeCityDialogFragment.newInstance();
                 cityDialogFragment.show(getSupportFragmentManager(), "ChangeCityDialogFragment");
                 return true;
             default:

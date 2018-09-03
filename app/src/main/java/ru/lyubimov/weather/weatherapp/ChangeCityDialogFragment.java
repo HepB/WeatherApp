@@ -10,6 +10,10 @@ import android.view.LayoutInflater;
 
 public class ChangeCityDialogFragment extends DialogFragment {
 
+    public static DialogFragment newInstance() {
+        return new ChangeCityDialogFragment();
+    }
+
     private ChangeCityDialogListener listener;
 
     public interface ChangeCityDialogListener {
