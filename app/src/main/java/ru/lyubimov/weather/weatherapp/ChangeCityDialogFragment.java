@@ -12,9 +12,12 @@ import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
 
@@ -75,12 +78,19 @@ public class ChangeCityDialogFragment extends DialogFragment {
         AutoCompleteTextView input = getDialog().findViewById(R.id.edit_city_name);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setThreshold(1);
-        Set<String> cities = repo.getCities();
+        final Set<String> cities = new HashSet<>();
+        Disposable disposable = repo.getCities().subscribe(new Consumer<Set<String>>() {
+            @Override
+            public void accept(Set<String> strings) throws Exception {
+                cities.addAll(strings);
+            }
+        });
         String[] arrCities = new String[cities.size()];
         arrCities = cities.toArray(arrCities);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),
                 android.R.layout.simple_list_item_1,
                 arrCities);
         input.setAdapter(adapter);
+        disposable.dispose();
     }
 }
