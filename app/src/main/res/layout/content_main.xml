@@ -90,7 +90,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/wind_ico"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="wind" />
+            tools:text="wind"
+            style="@style/AppTheme.Text"/>
 
         <ImageView
             android:id="@+id/cloud_ico"
@@ -117,7 +118,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/wind_ico"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="clouds" />
+            tools:text="clouds"
+            style="@style/AppTheme.Text"/>
 
     </android.support.constraint.ConstraintLayout>
 

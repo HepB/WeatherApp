@@ -35,6 +35,12 @@
     <string name="about_city">About weather city</string>
     <string name="about_temperature">About temperature</string>
 
+    <string name="about_me">Was burn, live.</string>
+    <string name="unknown_city">Unknown city</string>
+    <string name="unknown_lat">none</string>
+    <string name="unknown_lon">@string/unknown_lat</string>
+    <string name="unknown_temp">@string/unknown_lat</string>
+
     <string name="action_settings">Settings</string>
     <string name="dialog_description">Try to find weather by city</string>
     <string name="find">Find</string>
@@ -44,5 +50,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="weather_key">bebf456aa9257a2086ac7ea573cc9f77</string>
     <string name="metric">metric</string>
+    <string name="show_cities">Show cities</string>
 
 </resources>

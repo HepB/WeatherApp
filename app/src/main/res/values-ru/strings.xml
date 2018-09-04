@@ -32,6 +32,12 @@
     <string name="about_city">О городе</string>
     <string name="about_temperature">О температуре</string>
 
+    <string name="about_me">Родился, живу.</string>
+    <string name="unknown_city">Неизвестный город</string>
+    <string name="unknown_lat">нет данных</string>
+    <string name="unknown_lon">@string/unknown_lat</string>
+    <string name="unknown_temp">@string/unknown_lat</string>
+
     <string name="delete">Удалить</string>
     <string name="dialog_description">Попробуйте узнать погоду по названию города</string>
     <string name="find">Найти</string>
@@ -39,5 +45,6 @@
 
     <string name="weather_key">bebf456aa9257a2086ac7ea573cc9f77</string>
     <string name="metric">metric</string>
+    <string name="show_cities">Показать город</string>
 
 </resources>

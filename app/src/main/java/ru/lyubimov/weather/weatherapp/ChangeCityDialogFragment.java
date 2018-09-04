@@ -4,9 +4,19 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.view.LayoutInflater;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+
+import java.util.Objects;
+import java.util.Set;
+
+import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
+import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
 
 public class ChangeCityDialogFragment extends DialogFragment {
 
@@ -15,14 +25,17 @@ public class ChangeCityDialogFragment extends DialogFragment {
     }
 
     private ChangeCityDialogListener listener;
+    private CityRepository repo;
 
     public interface ChangeCityDialogListener {
         void onDialogPositiveClick(DialogFragment dialog);
         void onDialogNegativeClick(DialogFragment dialog);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        repo = new EncryptCityPrefRepository(Objects.requireNonNull(getActivity()).getPreferences(Context.MODE_PRIVATE));
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setView(inflater.inflate(R.layout.city_dialog, null))
@@ -42,6 +55,12 @@ public class ChangeCityDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        initInputView();
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
@@ -50,5 +69,18 @@ public class ChangeCityDialogFragment extends DialogFragment {
             throw new ClassCastException(context.toString()
                     + " must implement DialogInterface.OnClickListener");
         }
+    }
+
+    private void initInputView() {
+        AutoCompleteTextView input = getDialog().findViewById(R.id.edit_city_name);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setThreshold(1);
+        Set<String> cities = repo.getCities();
+        String[] arrCities = new String[cities.size()];
+        arrCities = cities.toArray(arrCities);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),
+                android.R.layout.simple_list_item_1,
+                arrCities);
+        input.setAdapter(adapter);
     }
 }
