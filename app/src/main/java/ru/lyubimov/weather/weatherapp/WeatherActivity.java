@@ -2,6 +2,7 @@ package ru.lyubimov.weather.weatherapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -37,14 +38,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
+import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
+import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
+import ru.lyubimov.weather.weatherapp.data.image.ExternalStorageLoader;
+import ru.lyubimov.weather.weatherapp.data.image.ImageLoader;
+import ru.lyubimov.weather.weatherapp.data.image.InternalStorageLoader;
 import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
 import ru.lyubimov.weather.weatherapp.fetcher.retrofit.OpenWeatherMapRetroFetcher;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
+
+import static ru.lyubimov.weather.weatherapp.data.city.CityRepository.CITIES;
 
 /**
  * Created by Alex on 13.12.2017.
@@ -53,7 +62,7 @@ import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
 public class WeatherActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         SingleObserver<ForecastWeather>,
-        ChangeCityDialogFragment.ChangeCityDialogListener{
+        ChangeCityDialogFragment.ChangeCityDialogListener {
 
     private static final String TAG = "WeatherActivity";
 
@@ -78,11 +87,14 @@ public class WeatherActivity extends AppCompatActivity implements
 
     private List<Disposable> mDisposables;
     private WeatherGetter mWeatherGetter;
+    private CityRepository repository;
+    private ImageLoader imageLoader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDisposables = new ArrayList<>();
 
         mTemperature = findViewById(R.id.temp_text);
         mCity = findViewById(R.id.city_name);
@@ -107,6 +119,21 @@ public class WeatherActivity extends AppCompatActivity implements
 
         NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        View header = mNavigationView.getHeaderView(0);
+        CircleImageView mCircleImageView = header.findViewById(R.id.profile_image);
+        //imageLoader = new InternalStorageLoader(getApplicationContext());
+        imageLoader = new ExternalStorageLoader(getApplicationContext());
+        //оборачиваем в String, для совместимости с api
+        Disposable disposable = imageLoader.getImage(InternalStorageLoader.FILENAME).subscribe(
+                mCircleImageView::setImageBitmap,
+                error -> {
+                    mCircleImageView.setImageDrawable(getResources().getDrawable(R.drawable.logo));
+                    showError(error);
+                }
+        );
+        mDisposables.add(disposable);
+
         mWeatherGetter = new OpenWeatherMapRetroFetcher();
     }
 
@@ -276,15 +303,33 @@ public class WeatherActivity extends AppCompatActivity implements
                 Snackbar.make(getWindow().getDecorView(), "Родился, живу.", Snackbar.LENGTH_LONG).show();
                 break;
             case R.id.about_city:
-                Snackbar.make(getWindow().getDecorView(), mForecastWeather.getCity().getCityName() + ", Lat: " +
-                        mForecastWeather.getCity().getCoordinate().getLatitude() +
-                        " Lon :" + mForecastWeather.getCity().getCoordinate().getLongitude(), Snackbar.LENGTH_LONG)
-                        .show();
+                String cityMessage;
+                if (mForecastWeather != null) {
+                    cityMessage = mForecastWeather.getCity().getCityName()
+                            + ", Lat: " + mForecastWeather.getCity().getCoordinate().getLatitude()
+                            + " Lon :" + mForecastWeather.getCity().getCoordinate().getLongitude();
+                } else {
+                    cityMessage = getString(R.string.unknown_city)
+                            + ", Lat: " + getString(R.string.unknown_lat)
+                            + " Lon :" + getString(R.string.unknown_lon);
+                }
+                Snackbar.make(getWindow().getDecorView(), cityMessage, Snackbar.LENGTH_LONG).show();
                 break;
             case R.id.about_temp:
+                String tempMessage;
+                if (mForecastWeather != null) {
+                    tempMessage = "Min: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMin() + "c, "
+                            + "Max: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMax() + "c";
+                } else {
+                    tempMessage = "Min: " + getString(R.string.unknown_temp) + ", "
+                            + "Max: " + getString(R.string.unknown_temp);
+                }
+                Snackbar.make(getWindow().getDecorView(), tempMessage, Snackbar.LENGTH_LONG).show();
+                break;
+            case R.id.encrypted_string:
+                String string = getPreferences(Context.MODE_PRIVATE).getString(CITIES, "");
                 Snackbar.make(getWindow().getDecorView(),
-                        "Min: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMin() + "c, "
-                                + "Max: " + mForecastWeather.getWeathers().get(0).getTemperature().getTempMax() + "c", Snackbar.LENGTH_LONG)
+                        string, Snackbar.LENGTH_LONG)
                         .show();
                 break;
             default:
@@ -302,9 +347,6 @@ public class WeatherActivity extends AppCompatActivity implements
 
     @Override
     public void onSubscribe(Disposable d) {
-        if (mDisposables == null) {
-            mDisposables = new ArrayList<>();
-        }
         mDisposables.add(d);
     }
 
@@ -316,8 +358,7 @@ public class WeatherActivity extends AppCompatActivity implements
 
     @Override
     public void onError(Throwable t) {
-        Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        Log.e(TAG, t.getMessage());
+        showError(t);
     }
 
 
@@ -330,10 +371,19 @@ public class WeatherActivity extends AppCompatActivity implements
         container.setCityName(cityName);
         //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
         subscribe(container, mWeatherGetter);
+        //по-хорошему, конечно, нужно все эти вещи создавть с помощью DI, но т. к проект учебный, будем лепить сильную связанность.
+        //repository = new CityPrefRepository(getPreferences(Context.MODE_PRIVATE));
+        repository = new EncryptCityPrefRepository(getPreferences(Context.MODE_PRIVATE));
+        repository.addCity(cityName);
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         dialog.getDialog().cancel();
+    }
+
+    private void showError(Throwable error) {
+        Log.e(TAG, error.getMessage());
+        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
     }
 }

@@ -6,17 +6,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/colorWhite</item>
         <item name="android:itemTextAppearance">@style/TextAppearance</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme.Text">
         <item name="android:textColor">@color/colorWhite</item>
-    </style>
-
-    <style name="AppTheme.Text.Black">
-        <item name="android:textColor">@color/colorBlack</item>
     </style>
 
     <style name="ToolBarStyle" parent="Theme.AppCompat">

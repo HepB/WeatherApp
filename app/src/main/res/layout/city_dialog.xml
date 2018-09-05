@@ -13,12 +13,11 @@
         android:layout_marginTop="16dp"
         android:text="@string/dialog_description"
         android:gravity="center_horizontal"
-        style="@style/AppTheme.Text.Black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/edit_city_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,7 +28,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/description" />
+        app:layout_constraintTop_toBottomOf="@+id/description"
+        style="@style/Animation.AppCompat.DropDownUp"/>
 
 
 </LinearLayout>
