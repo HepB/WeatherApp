@@ -6,6 +6,10 @@
     <string name="permission_denied_explanation">Разрешение доступа к геолокации было отклонено,но оно необходимо для корректной работы программы.</string>
     <string name="no_internet_exception">Нет соединения с интернетом. Убедитесь, что интернте включен на устройстве или попробуйте позже..</string>
     <string name="parse_exception">Невозможно получить данные о погоде. Вероятно, проблема на стороне провайдера погоды, пожалуйста, попробуйте позже.</string>
+    <string name="save_file_error">Ошибка при попытке сохранения файла в файловом хранилище.</string>
+    <string name="load_file_error">Ошибка при попытке загрузки файла из файлового хранилища.</string>
+    <string name="not_readable_external_storage">Внешнее хранилище не доступно.</string>
+    <string name="not_writable_external_storage">Внешнее хранилище в режиме read only.</string>
 
     <string name="wind_speed">м/с</string>
     <string name="coord_info">шир: %1f\nдол: %2f</string>

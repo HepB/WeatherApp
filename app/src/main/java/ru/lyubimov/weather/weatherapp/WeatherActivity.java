@@ -38,10 +38,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
+import ru.lyubimov.weather.weatherapp.data.image.ExternalStorageLoader;
+import ru.lyubimov.weather.weatherapp.data.image.ImageLoader;
+import ru.lyubimov.weather.weatherapp.data.image.InternalStorageLoader;
 import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
 import ru.lyubimov.weather.weatherapp.fetcher.retrofit.OpenWeatherMapRetroFetcher;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
@@ -58,7 +62,7 @@ import static ru.lyubimov.weather.weatherapp.data.city.CityRepository.CITIES;
 public class WeatherActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         SingleObserver<ForecastWeather>,
-        ChangeCityDialogFragment.ChangeCityDialogListener{
+        ChangeCityDialogFragment.ChangeCityDialogListener {
 
     private static final String TAG = "WeatherActivity";
 
@@ -84,11 +88,13 @@ public class WeatherActivity extends AppCompatActivity implements
     private List<Disposable> mDisposables;
     private WeatherGetter mWeatherGetter;
     private CityRepository repository;
+    private ImageLoader imageLoader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDisposables = new ArrayList<>();
 
         mTemperature = findViewById(R.id.temp_text);
         mCity = findViewById(R.id.city_name);
@@ -113,6 +119,21 @@ public class WeatherActivity extends AppCompatActivity implements
 
         NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        View header = mNavigationView.getHeaderView(0);
+        CircleImageView mCircleImageView = header.findViewById(R.id.profile_image);
+        //imageLoader = new InternalStorageLoader(getApplicationContext());
+        imageLoader = new ExternalStorageLoader(getApplicationContext());
+        //оборачиваем в String, для совместимости с api
+        Disposable disposable = imageLoader.getImage(InternalStorageLoader.FILENAME).subscribe(
+                mCircleImageView::setImageBitmap,
+                error -> {
+                    mCircleImageView.setImageDrawable(getResources().getDrawable(R.drawable.logo));
+                    showError(error);
+                }
+        );
+        mDisposables.add(disposable);
+
         mWeatherGetter = new OpenWeatherMapRetroFetcher();
     }
 
@@ -283,7 +304,7 @@ public class WeatherActivity extends AppCompatActivity implements
                 break;
             case R.id.about_city:
                 String cityMessage;
-                if(mForecastWeather != null) {
+                if (mForecastWeather != null) {
                     cityMessage = mForecastWeather.getCity().getCityName()
                             + ", Lat: " + mForecastWeather.getCity().getCoordinate().getLatitude()
                             + " Lon :" + mForecastWeather.getCity().getCoordinate().getLongitude();
@@ -292,7 +313,7 @@ public class WeatherActivity extends AppCompatActivity implements
                             + ", Lat: " + getString(R.string.unknown_lat)
                             + " Lon :" + getString(R.string.unknown_lon);
                 }
-                Snackbar.make(getWindow().getDecorView(), cityMessage , Snackbar.LENGTH_LONG).show();
+                Snackbar.make(getWindow().getDecorView(), cityMessage, Snackbar.LENGTH_LONG).show();
                 break;
             case R.id.about_temp:
                 String tempMessage;
@@ -326,9 +347,6 @@ public class WeatherActivity extends AppCompatActivity implements
 
     @Override
     public void onSubscribe(Disposable d) {
-        if (mDisposables == null) {
-            mDisposables = new ArrayList<>();
-        }
         mDisposables.add(d);
     }
 
@@ -340,8 +358,7 @@ public class WeatherActivity extends AppCompatActivity implements
 
     @Override
     public void onError(Throwable t) {
-        Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        Log.e(TAG, t.getMessage());
+        showError(t);
     }
 
 
@@ -363,5 +380,10 @@ public class WeatherActivity extends AppCompatActivity implements
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         dialog.getDialog().cancel();
+    }
+
+    private void showError(Throwable error) {
+        Log.e(TAG, error.getMessage());
+        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
     }
 }
