@@ -12,7 +12,6 @@ import java.util.Set;
 
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 
 public class EncryptCityPrefRepository extends CityPrefRepository {
 
@@ -24,23 +23,14 @@ public class EncryptCityPrefRepository extends CityPrefRepository {
     public Single<Set<String>> getCities() {
         String encryptData = preferences.getString(CITIES, "");
         String jsonCities = new String(Base64.decode(encryptData, Base64.DEFAULT));
-        Type type = new TypeToken<HashSet<String>>() {}.getType();
-        Set<String> set = new Gson().fromJson(jsonCities, type);
-        if (set == null) {
-            set = new HashSet<>();
-        }
+        Set<String> set = getCitiesFromJson(jsonCities);
         return Single.just(set);
     }
 
     @Override
     public void addCity(String city) {
         final Set<String> cities = new HashSet<>();
-        Disposable disposable = getCities().subscribe(new Consumer<Set<String>>() {
-            @Override
-            public void accept(Set<String> strings){
-                cities.addAll(strings);
-            }
-        });
+        Disposable disposable = getCities().subscribe(cities::addAll);
         cities.add(city);
         SharedPreferences.Editor editor = preferences.edit();
         Type type = new TypeToken<HashSet<String>>() {}.getType();

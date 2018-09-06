@@ -124,11 +124,14 @@ public class WeatherActivity extends AppCompatActivity implements
         CircleImageView mCircleImageView = header.findViewById(R.id.profile_image);
         //imageLoader = new InternalStorageLoader(getApplicationContext());
         imageLoader = new ExternalStorageLoader(getApplicationContext());
-        //оборачиваем в String, для совместимости с api
         Disposable disposable = imageLoader.getImage(InternalStorageLoader.FILENAME).subscribe(
-                mCircleImageView::setImageBitmap,
+                success -> {
+                    mCircleImageView.setImageBitmap(success);
+                    Log.i(TAG, Thread.currentThread().getName());
+                },
                 error -> {
                     mCircleImageView.setImageDrawable(getResources().getDrawable(R.drawable.logo));
+                    Log.e(TAG, "error to load picture", error);
                     showError(error);
                 }
         );
