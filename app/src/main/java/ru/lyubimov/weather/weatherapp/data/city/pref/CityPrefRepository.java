@@ -11,7 +11,6 @@ import java.util.Set;
 
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 
 public class CityPrefRepository implements CityRepository {
@@ -25,22 +24,14 @@ public class CityPrefRepository implements CityRepository {
     @Override
     public Single<Set<String>> getCities() {
         String jsonCities = preferences.getString(CITIES, "");
-        Type type = new TypeToken<HashSet<String>>() {
-        }.getType();
-        Set<String> set = new Gson().fromJson(jsonCities, type);
-        set = set == null ? new HashSet<String>() : set;
+        Set<String> set = getCitiesFromJson(jsonCities);
         return Single.just(set);
     }
 
     @Override
     public void addCity(String city) {
         final Set<String> cities = new HashSet<>();
-        Disposable disposable = getCities().subscribe(new Consumer<Set<String>>() {
-            @Override
-            public void accept(Set<String> strings) throws Exception {
-                cities.addAll(strings);
-            }
-        });
+        Disposable disposable = getCities().subscribe(cities::addAll);
         cities.add(city);
         SharedPreferences.Editor editor = preferences.edit();
         Type type = new TypeToken<HashSet<String>>() {}.getType();
@@ -48,5 +39,11 @@ public class CityPrefRepository implements CityRepository {
         editor.putString(CITIES, jsonCities);
         editor.apply();
         disposable.dispose();
+    }
+
+    Set<String> getCitiesFromJson(String jsonCities) {
+        Type type = new TypeToken<HashSet<String>>() {}.getType();
+        Set<String> result = new Gson().fromJson(jsonCities, type);
+        return result == null ? new HashSet<>() : result;
     }
 }

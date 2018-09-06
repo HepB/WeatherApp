@@ -6,51 +6,28 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import ru.lyubimov.weather.weatherapp.R;
 
-public class InternalStorageLoader implements ImageLoader {
+public class InternalStorageLoader extends ImageStorageLoader {
     private static final String TAG = "InternalStorageLoader";
 
-    public static final String FILENAME = "logo.jpeg";
-
-    private Context context;
+    public static final String FILENAME = "logo.png";
 
     public InternalStorageLoader(Context context) {
-        this.context = context;
+        super(context);
     }
+
 
     @Override
-    public Single<Bitmap> getImage(String path){
-        return Single.just(getBitmap(path))
-                .observeOn(Schedulers.newThread())
-                .subscribeOn(AndroidSchedulers.mainThread());
-    }
-
-    private Bitmap getBitmap(String path) {
+    Bitmap getBitmap(String path) {
         File file = new File(context.getFilesDir(), path);
-        Bitmap bitmap = null;
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
+        Log.i(TAG, Thread.currentThread().getName());
         if (!file.exists()) {
-            //костыльно создадим фаил из ресурсов
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.flush();
-            } catch (Exception e) {
-                Log.e(TAG, context.getString(R.string.save_file_error), e);
-            }
+            saveBitmapInStorage(bitmap, file);
         } else {
-                try(FileInputStream fis = new FileInputStream(file)) {
-                    bitmap = BitmapFactory.decodeStream(fis);
-                    Log.i(TAG, "OK");
-                } catch (Exception e) {
-                    Log.e(TAG, context.getString(R.string.load_file_error), e);
-                }
+            bitmap = initBitmapFromStorage(bitmap, file);
         }
         return bitmap;
     }
