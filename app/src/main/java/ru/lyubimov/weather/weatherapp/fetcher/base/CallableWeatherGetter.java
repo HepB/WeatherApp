@@ -19,12 +19,7 @@ public class CallableWeatherGetter implements WeatherGetter{
 
     @Override
     public Single<ForecastWeather> getWeatherResult(final RequestContainer container) {
-        return Single.fromCallable(new Callable<ForecastWeather>() {
-            @Override
-            public ForecastWeather call() {
-                return mWeatherFetcher.downloadWeather(container);
-            }
-        }).subscribeOn(Schedulers.io())
+        return Single.fromCallable(() -> mWeatherFetcher.downloadWeather(container)).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

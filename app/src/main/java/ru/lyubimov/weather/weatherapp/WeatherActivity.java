@@ -165,19 +165,16 @@ public class WeatherActivity extends AppCompatActivity implements
         request.setNumUpdates(1);
         request.setInterval(0);
         mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            Log.i(TAG, "Got a fix: " + location);
-                            RequestContainer container = new RequestContainer();
-                            container.setResources(getResources());
-                            container.setLocation(location);
-                            //subscribe(container, new CallableWeatherGetter(new FetcherByGeo()));
-                            subscribe(container, mWeatherGetter);
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
-                        }
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        Log.i(TAG, "Got a fix: " + location);
+                        RequestContainer container = new RequestContainer();
+                        container.setResources(getResources());
+                        container.setLocation(location);
+                        //subscribe(container, new CallableWeatherGetter(new FetcherByGeo()));
+                        subscribe(container, mWeatherGetter);
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -256,34 +253,28 @@ public class WeatherActivity extends AppCompatActivity implements
     }
 
     private void addPopup() {
-        mCity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), v);
-                popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        RequestContainer container = new RequestContainer();
-                        container.setResources(getResources());
-                        switch (item.getItemId()) {
-                            case R.id.menu_fetch_msk:
-                                container.setCityName("Moscow,RU");
-                                //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
-                                subscribe(container, mWeatherGetter);
-                                return true;
-                            case R.id.menu_fetch_lnd:
-                                container.setCityName("London,UK");
-                                //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
-                                subscribe(container, mWeatherGetter);
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                });
-                popupMenu.show();
-            }
+        mCity.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(getApplicationContext(), v);
+            popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+            popupMenu.setOnMenuItemClickListener(item -> {
+                RequestContainer container = new RequestContainer();
+                container.setResources(getResources());
+                switch (item.getItemId()) {
+                    case R.id.menu_fetch_msk:
+                        container.setCityName("Moscow,RU");
+                        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
+                        subscribe(container, mWeatherGetter);
+                        return true;
+                    case R.id.menu_fetch_lnd:
+                        container.setCityName("London,UK");
+                        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
+                        subscribe(container, mWeatherGetter);
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+            popupMenu.show();
         });
     }
 

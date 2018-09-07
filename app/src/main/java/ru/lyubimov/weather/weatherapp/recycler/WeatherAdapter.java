@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -113,21 +112,13 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
                 mLayout.setBackgroundColor(activity.getResources().getColor(R.color.colorBackgroundDay));
             }
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallbacks);
-                    selectItem(weather);
-                    return true;
-                }
+            itemView.setOnLongClickListener(view -> {
+                ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallbacks);
+                selectItem(weather);
+                return true;
             });
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    selectItem(weather);
-                }
-            });
+            itemView.setOnClickListener(view -> selectItem(weather));
         }
 
         private void selectItem(Weather weather) {
