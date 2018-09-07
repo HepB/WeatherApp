@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -22,6 +24,7 @@ import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
 
 public class ChangeCityDialogFragment extends DialogFragment {
+    private static final String TAG = "ChangeCityDialogFragment";
 
     public static DialogFragment newInstance() {
         return new ChangeCityDialogFragment();
@@ -29,6 +32,8 @@ public class ChangeCityDialogFragment extends DialogFragment {
 
     private ChangeCityDialogListener listener;
     private CityRepository repo;
+
+    private List<Disposable> mDisposables;
 
     public interface ChangeCityDialogListener {
         void onDialogPositiveClick(DialogFragment dialog);
@@ -39,21 +44,12 @@ public class ChangeCityDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         repo = new EncryptCityPrefRepository(Objects.requireNonNull(getActivity()).getPreferences(Context.MODE_PRIVATE));
+        mDisposables = new ArrayList<>();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setView(inflater.inflate(R.layout.city_dialog, null))
-                .setPositiveButton(R.string.find, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        listener.onDialogPositiveClick(ChangeCityDialogFragment.this);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        listener.onDialogNegativeClick(ChangeCityDialogFragment.this);
-                    }
-                });
+                .setPositiveButton(R.string.find, (dialog, which) -> listener.onDialogPositiveClick(ChangeCityDialogFragment.this))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> listener.onDialogNegativeClick(ChangeCityDialogFragment.this));
         return builder.create();
     }
 
@@ -79,18 +75,21 @@ public class ChangeCityDialogFragment extends DialogFragment {
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setThreshold(1);
         final Set<String> cities = new HashSet<>();
-        Disposable disposable = repo.getCities().subscribe(new Consumer<Set<String>>() {
-            @Override
-            public void accept(Set<String> strings) throws Exception {
-                cities.addAll(strings);
-            }
-        });
+        Disposable disposable = repo.getCities().subscribe(cities::addAll);
         String[] arrCities = new String[cities.size()];
         arrCities = cities.toArray(arrCities);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),
                 android.R.layout.simple_list_item_1,
                 arrCities);
         input.setAdapter(adapter);
-        disposable.dispose();
+        mDisposables.add(disposable);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (Disposable disposable: mDisposables) {
+            disposable.dispose();
+        }
     }
 }

@@ -29,7 +29,7 @@ abstract class ImageStorageLoader implements ImageLoader {
 
     @Override
     public Single<Bitmap> getImage(String path) {
-        return Single.create((SingleOnSubscribe<Bitmap>) emitter -> getBitmap(path))
+        return Single.fromCallable(() -> getBitmap(path))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
