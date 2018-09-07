@@ -2,10 +2,9 @@ package ru.lyubimov.weather.weatherapp.model
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.util.ArrayList
 
 class ForecastWeather {
-    @Expose @SerializedName("list") var weathers: ArrayList<Weather>? = null
+    @Expose @SerializedName("list") var weathers: List<Weather>? = null
     @Expose @SerializedName("city") var city: City? = null
 }
 
@@ -43,6 +42,6 @@ class City {
 }
 
 class Coordinate {
-    @Expose @SerializedName("lat") var latitude: Float = 0f
-    @Expose @SerializedName("lon") var longitude: Float = 0f
+    @Expose @SerializedName("lat") var latitude: Float? = 0f
+    @Expose @SerializedName("lon") var longitude: Float? = 0f
 }

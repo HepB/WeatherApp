@@ -13,6 +13,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import ru.lyubimov.weather.weatherapp.R;
 import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
+import ru.lyubimov.weather.weatherapp.model.DatabaseWeatherModel;
+import ru.lyubimov.weather.weatherapp.model.DbRequestModelConverter;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
@@ -44,7 +46,10 @@ public class OpenWeatherMapRetroFetcher implements WeatherGetter {
             Log.d(TAG, "Something wrong");
             result = api.fetchWeatherByCity("Moscow,RU", resources.getString(R.string.metric), country, resources.getString(R.string.weather_key)).singleOrError();
         }
-        return result.subscribeOn(Schedulers.io())
+        return result.doOnSuccess(fWeather -> {
+            DatabaseWeatherModel dbModel = new DbRequestModelConverter().requestToDbModelConvert(fWeather);
+        })
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }
