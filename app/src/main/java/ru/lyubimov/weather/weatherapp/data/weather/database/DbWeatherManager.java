@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.Date;
 
@@ -15,23 +16,19 @@ public class DbWeatherManager {
     private final DatabaseHelper databaseHelper;
     private SQLiteDatabase database;
 
-    private final String[] notesAllColumn = {
-            DatabaseHelper.COLUMN_CITY,
-            DatabaseHelper.COLUMN_LATITUDE,
-            DatabaseHelper.COLUMN_LONGITUDE,
-            DatabaseHelper.COLUMN_WEATHERS,
-            DatabaseHelper.COLUMN_TIMESTAMP
-    };
-
     public DbWeatherManager(Context context) {
         databaseHelper = new DatabaseHelper(context);
 
     }
 
     public void open() {
+        Log.i(TAG, "Open DB");
         database = databaseHelper.getWritableDatabase();
     }
-    public void close() {database.close();}
+    public void close() {
+        Log.i(TAG, "Close DB");
+        database.close();
+    }
 
     public void addWeather(DatabaseWeatherModel databaseWeatherModel) {
         ContentValues values = new ContentValues();
@@ -44,16 +41,15 @@ public class DbWeatherManager {
     }
 
     public DatabaseWeatherModel getLastWeather() {
-        try (Cursor cursor = database.query(DatabaseHelper.TABLE_WEATHERS, notesAllColumn,
+        try (Cursor cursor = database.query(DatabaseHelper.TABLE_WEATHERS,
                 null,
                 null,
                 null,
                 null,
-                DatabaseHelper.COLUMN_TIMESTAMP)) {
-            cursor.moveToLast();
-            DatabaseWeatherModel result = cursorToWeather(cursor);
-            cursor.close();
-            return result;
+                null,
+                DatabaseHelper.COLUMN_TIMESTAMP + " DESC")) {
+            cursor.moveToFirst();
+            return cursorToWeather(cursor);
         }
     }
 
