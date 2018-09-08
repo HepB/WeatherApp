@@ -23,7 +23,7 @@ public class InternalStorageLoader extends ImageStorageLoader {
     Bitmap getBitmap(String path) {
         File file = new File(context.getFilesDir(), path);
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
-        Log.i(TAG, Thread.currentThread().getName());
+        Log.i(TAG, Thread.currentThread().getName() + " getBitmap");
         if (!file.exists()) {
             saveBitmapInStorage(bitmap, file);
         } else {
