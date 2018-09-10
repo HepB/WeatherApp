@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher;
+package ru.lyubimov.weather.weatherapp.data.weather;
 
 import io.reactivex.Single;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;

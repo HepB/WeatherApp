@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher.base;
+package ru.lyubimov.weather.weatherapp.data.weather.network.base;
 
 import android.location.Location;
 import android.net.Uri;

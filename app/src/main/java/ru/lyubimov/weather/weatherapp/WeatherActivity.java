@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -32,23 +31,30 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
 import io.reactivex.SingleObserver;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
 import ru.lyubimov.weather.weatherapp.data.image.ExternalStorageLoader;
 import ru.lyubimov.weather.weatherapp.data.image.ImageLoader;
 import ru.lyubimov.weather.weatherapp.data.image.InternalStorageLoader;
-import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
-import ru.lyubimov.weather.weatherapp.fetcher.retrofit.OpenWeatherMapRetroFetcher;
+import ru.lyubimov.weather.weatherapp.data.weather.WeatherGetter;
+import ru.lyubimov.weather.weatherapp.data.weather.database.DbWeatherManager;
+import ru.lyubimov.weather.weatherapp.data.weather.network.retrofit.OpenWeatherMapRetroFetcher;
+import ru.lyubimov.weather.weatherapp.model.DatabaseWeatherModel;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
+import ru.lyubimov.weather.weatherapp.model.ModelConverter;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
@@ -89,6 +95,7 @@ public class WeatherActivity extends AppCompatActivity implements
     private WeatherGetter mWeatherGetter;
     private CityRepository repository;
     private ImageLoader imageLoader;
+    private DbWeatherManager mDbWeatherManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,14 +145,17 @@ public class WeatherActivity extends AppCompatActivity implements
         mDisposables.add(disposable);
 
         mWeatherGetter = new OpenWeatherMapRetroFetcher();
+        mDbWeatherManager = new DbWeatherManager(getApplicationContext());
+        mDbWeatherManager.open();
     }
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         for (Disposable disposable : mDisposables) {
             disposable.dispose();
         }
-        super.onDestroy();
+        mDbWeatherManager.close();
     }
 
     @Override
@@ -169,7 +179,7 @@ public class WeatherActivity extends AppCompatActivity implements
                     if (location != null) {
                         Log.i(TAG, "Got a fix: " + location);
                         RequestContainer container = new RequestContainer();
-                        container.setResources(getResources());
+                        container.setContext(getApplicationContext());
                         container.setLocation(location);
                         //subscribe(container, new CallableWeatherGetter(new FetcherByGeo()));
                         subscribe(container, mWeatherGetter);
@@ -238,7 +248,7 @@ public class WeatherActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         RequestContainer container = new RequestContainer();
-        container.setResources(getResources());
+        container.setContext(getApplicationContext());
         switch (item.getItemId()) {
             case R.id.menu_refresh_data:
                 getLocationAndFetchWeatherData();
@@ -258,7 +268,7 @@ public class WeatherActivity extends AppCompatActivity implements
             popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
             popupMenu.setOnMenuItemClickListener(item -> {
                 RequestContainer container = new RequestContainer();
-                container.setResources(getResources());
+                container.setContext(getApplicationContext());
                 switch (item.getItemId()) {
                     case R.id.menu_fetch_msk:
                         container.setCityName("Moscow,RU");
@@ -336,7 +346,23 @@ public class WeatherActivity extends AppCompatActivity implements
     }
 
     private void subscribe(RequestContainer container, WeatherGetter getter) {
-        getter.getWeatherResult(container).subscribe(this);
+        getter.getWeatherResult(container)
+                .doOnSuccess(forecastWeather -> {
+                    Log.i(TAG, Thread.currentThread().getName() + " doOnSuccess");
+                    DatabaseWeatherModel databaseWeatherModel = ModelConverter.requestToDbModelConvert(forecastWeather);
+                    mDbWeatherManager.addWeather(databaseWeatherModel);
+                })
+                .onErrorResumeNext(Single.create(emitter -> {
+                    //SingleEmitter
+                    Log.d(TAG, "network error");
+                    DatabaseWeatherModel databaseWeatherModel = mDbWeatherManager.getLastWeather();
+                    Log.d(TAG, databaseWeatherModel.toString());
+                    Log.d(TAG, Thread.currentThread().getName() + " onErrorResumeNext");
+                    showError(new Throwable(getString(R.string.db_message)));
+                    emitter.onSuccess(ModelConverter.dbToRequestModelConvert(databaseWeatherModel));
+                })).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this);
     }
 
     @Override
@@ -361,7 +387,7 @@ public class WeatherActivity extends AppCompatActivity implements
         EditText editText = dialog.getDialog().findViewById(R.id.edit_city_name);
         String cityName = editText.getText().toString();
         RequestContainer container = new RequestContainer();
-        container.setResources(getResources());
+        container.setContext(getApplicationContext());
         container.setCityName(cityName);
         //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
         subscribe(container, mWeatherGetter);
@@ -377,7 +403,9 @@ public class WeatherActivity extends AppCompatActivity implements
     }
 
     private void showError(Throwable error) {
-        Log.e(TAG, error.getMessage());
-        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        this.runOnUiThread(() -> {
+            Log.e(TAG, error.getMessage());
+            Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        });
     }
 }

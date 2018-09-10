@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp.fetcher.retrofit;
+package ru.lyubimov.weather.weatherapp.data.weather.network.retrofit;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;

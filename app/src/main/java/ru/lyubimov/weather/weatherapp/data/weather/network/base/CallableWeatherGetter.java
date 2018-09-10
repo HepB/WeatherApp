@@ -1,11 +1,9 @@
-package ru.lyubimov.weather.weatherapp.fetcher.base;
-
-import java.util.concurrent.Callable;
+package ru.lyubimov.weather.weatherapp.data.weather.network.base;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import ru.lyubimov.weather.weatherapp.fetcher.WeatherGetter;
+import ru.lyubimov.weather.weatherapp.data.weather.WeatherGetter;
 import ru.lyubimov.weather.weatherapp.model.ForecastWeather;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 
