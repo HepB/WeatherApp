@@ -11,7 +11,7 @@
     <string name="not_readable_external_storage">Внешнее хранилище не доступно.</string>
     <string name="not_writable_external_storage">Внешнее хранилище в режиме read only.</string>
 
-    <string name="db_message">Нет соединения. Будет отображена последняя информация о погоде.</string>
+    <string name="db_message">Ошибка получения погоды. Будет отображена последняя информация о погоде.</string>
 
     <string name="wind_speed">м/с</string>
     <string name="coord_info">шир: %1f\nдол: %2f</string>
