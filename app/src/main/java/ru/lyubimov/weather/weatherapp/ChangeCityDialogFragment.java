@@ -2,7 +2,6 @@ package ru.lyubimov.weather.weatherapp;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -19,7 +18,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import ru.lyubimov.weather.weatherapp.data.city.CityRepository;
 import ru.lyubimov.weather.weatherapp.data.city.pref.EncryptCityPrefRepository;
 

@@ -6,11 +6,12 @@
 
     <color name="colorLightGray">#DDDDDD</color>
     <color name="colorGray">#999999</color>
-    <color name="colorRowSelected">#6dccfa</color>
+    <color name="colorRowSelected">#EEE</color>
     <color name="colorBackgroundDay">#4aabda</color>
     <color name="colorBackgroundNight">#2a8bba</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorYellow">#fff9c4</color>
-    <color name="colorBlack">#000</color>
+    <color name="colorDarkGray">#484848</color>
+    <color name="colorText">@android:color/primary_text_dark</color>
     <color name="colorTemperature">#e8f5ed</color>
 </resources>

@@ -15,6 +15,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -38,9 +39,7 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.SingleObserver;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -144,9 +143,13 @@ public class WeatherActivity extends AppCompatActivity implements
         );
         mDisposables.add(disposable);
 
+        CardView cardView = findViewById(R.id.card_view_main);
+        cardView.setCardElevation(8f);
+
         mWeatherGetter = new OpenWeatherMapRetroFetcher();
         mDbWeatherManager = new DbWeatherManager(getApplicationContext());
         mDbWeatherManager.open();
+
     }
 
     @Override
