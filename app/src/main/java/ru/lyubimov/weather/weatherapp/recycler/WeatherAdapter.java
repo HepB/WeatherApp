@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.lyubimov.weather.weatherapp.R;
-import ru.lyubimov.weather.weatherapp.ViewUtils;
+import ru.lyubimov.weather.weatherapp.utils.ViewUtils;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherHolder> {

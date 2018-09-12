@@ -10,7 +10,8 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:id="@+id/weather_ico"

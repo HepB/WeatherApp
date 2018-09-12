@@ -48,6 +48,7 @@
     <string name="dialog_description">Попробуйте узнать погоду по названию города</string>
     <string name="find">Найти</string>
     <string name="cancel">Отмена</string>
+    <string name="weather_data_tittle">Отправить информацию о погоде</string>
 
     <string name="weather_key">bebf456aa9257a2086ac7ea573cc9f77</string>
     <string name="metric">metric</string>
