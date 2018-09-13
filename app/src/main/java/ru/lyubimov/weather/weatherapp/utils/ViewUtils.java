@@ -1,4 +1,4 @@
-package ru.lyubimov.weather.weatherapp;
+package ru.lyubimov.weather.weatherapp.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import ru.lyubimov.weather.weatherapp.R;
 import ru.lyubimov.weather.weatherapp.model.Clouds;
 import ru.lyubimov.weather.weatherapp.model.Temperature;
 import ru.lyubimov.weather.weatherapp.model.Wind;

@@ -2,9 +2,9 @@ package ru.lyubimov.weather.weatherapp.recycler;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.lyubimov.weather.weatherapp.R;
-import ru.lyubimov.weather.weatherapp.ViewUtils;
+import ru.lyubimov.weather.weatherapp.utils.ViewUtils;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherHolder> {
@@ -90,7 +90,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
         private TextView mDateInfo;
         private ImageView mWeatherInfo;
         private TextView mTempInfo;
-        private ConstraintLayout mLayout;
+        private CardView mLayout;
 
         private WeatherHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.time_stamp_item, parent, false));
@@ -107,9 +107,9 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             ViewUtils.setTemperatureInformation(activity.getResources(), mTempInfo, mWeather.getTemperature());
 
             if (selectedItems.contains(weather)) {
-                mLayout.setBackgroundColor(activity.getResources().getColor(R.color.colorRowSelected));
+                mLayout.setCardElevation(0f);
             } else {
-                mLayout.setBackgroundColor(activity.getResources().getColor(R.color.colorBackgroundDay));
+                mLayout.setCardElevation(R.styleable.CardView_cardElevation);
             }
 
             itemView.setOnLongClickListener(view -> {
@@ -125,11 +125,11 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherH
             if (multiSelect) {
                 if (selectedItems.contains(weather)) {
                     selectedItems.remove(weather);
-                    mLayout.setBackgroundColor(activity.getResources().getColor(R.color.colorBackgroundDay));
+                    mLayout.setCardElevation(R.styleable.CardView_cardElevation);
                     if(selectedItems.isEmpty()) actionMode.finish();
                 } else {
                     selectedItems.add(weather);
-                    mLayout.setBackgroundColor(activity.getResources().getColor(R.color.colorRowSelected));
+                    mLayout.setCardElevation(0f);
                 }
             }
         }

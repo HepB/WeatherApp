@@ -3,9 +3,11 @@ package ru.lyubimov.weather.weatherapp;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +17,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -38,9 +41,7 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.SingleObserver;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -58,6 +59,8 @@ import ru.lyubimov.weather.weatherapp.model.ModelConverter;
 import ru.lyubimov.weather.weatherapp.model.RequestContainer;
 import ru.lyubimov.weather.weatherapp.model.Weather;
 import ru.lyubimov.weather.weatherapp.recycler.WeatherAdapter;
+import ru.lyubimov.weather.weatherapp.utils.MessageUtils;
+import ru.lyubimov.weather.weatherapp.utils.ViewUtils;
 
 import static ru.lyubimov.weather.weatherapp.data.city.CityRepository.CITIES;
 
@@ -93,8 +96,6 @@ public class WeatherActivity extends AppCompatActivity implements
 
     private List<Disposable> mDisposables;
     private WeatherGetter mWeatherGetter;
-    private CityRepository repository;
-    private ImageLoader imageLoader;
     private DbWeatherManager mDbWeatherManager;
 
     @Override
@@ -112,6 +113,7 @@ public class WeatherActivity extends AppCompatActivity implements
         mWeatherTimesLayout = findViewById(R.id.five_day_times_layout);
         mWeatherTimesLayout.setLayoutManager(new LinearLayoutManager(this));
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        FloatingActionButton mFloatingButton = findViewById(R.id.fab);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -129,8 +131,7 @@ public class WeatherActivity extends AppCompatActivity implements
 
         View header = mNavigationView.getHeaderView(0);
         CircleImageView mCircleImageView = header.findViewById(R.id.profile_image);
-        //imageLoader = new InternalStorageLoader(getApplicationContext());
-        imageLoader = new ExternalStorageLoader(getApplicationContext());
+        ImageLoader imageLoader = new ExternalStorageLoader(getApplicationContext());
         Disposable disposable = imageLoader.getImage(InternalStorageLoader.FILENAME).subscribe(
                 success -> {
                     mCircleImageView.setImageBitmap(success);
@@ -144,9 +145,20 @@ public class WeatherActivity extends AppCompatActivity implements
         );
         mDisposables.add(disposable);
 
+        CardView cardView = findViewById(R.id.card_view_main);
+        cardView.setCardElevation(8f);
+
         mWeatherGetter = new OpenWeatherMapRetroFetcher();
         mDbWeatherManager = new DbWeatherManager(getApplicationContext());
         mDbWeatherManager.open();
+        mFloatingButton.setOnClickListener(listener -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            String message = MessageUtils.createMessageAboutWeather(mForecastWeather);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, message);
+            startActivity(Intent.createChooser(intent, "Послать данные о погоде"));
+        });
+
     }
 
     @Override
@@ -181,7 +193,6 @@ public class WeatherActivity extends AppCompatActivity implements
                         RequestContainer container = new RequestContainer();
                         container.setContext(getApplicationContext());
                         container.setLocation(location);
-                        //subscribe(container, new CallableWeatherGetter(new FetcherByGeo()));
                         subscribe(container, mWeatherGetter);
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.no_location_detected, Toast.LENGTH_LONG).show();
@@ -272,12 +283,10 @@ public class WeatherActivity extends AppCompatActivity implements
                 switch (item.getItemId()) {
                     case R.id.menu_fetch_msk:
                         container.setCityName("Moscow,RU");
-                        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
                         subscribe(container, mWeatherGetter);
                         return true;
                     case R.id.menu_fetch_lnd:
                         container.setCityName("London,UK");
-                        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
                         subscribe(container, mWeatherGetter);
                         return true;
                     default:
@@ -389,11 +398,9 @@ public class WeatherActivity extends AppCompatActivity implements
         RequestContainer container = new RequestContainer();
         container.setContext(getApplicationContext());
         container.setCityName(cityName);
-        //subscribe(container, new CallableWeatherGetter(new FetcherByCity()));
         subscribe(container, mWeatherGetter);
         //по-хорошему, конечно, нужно все эти вещи создавть с помощью DI, но т. к проект учебный, будем лепить сильную связанность.
-        //repository = new CityPrefRepository(getPreferences(Context.MODE_PRIVATE));
-        repository = new EncryptCityPrefRepository(getPreferences(Context.MODE_PRIVATE));
+        CityRepository repository = new EncryptCityPrefRepository(getPreferences(Context.MODE_PRIVATE));
         repository.addCity(cityName);
     }
 

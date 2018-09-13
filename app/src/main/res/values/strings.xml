@@ -51,6 +51,7 @@
     <string name="dialog_description">Try to find weather by city</string>
     <string name="find">Find</string>
     <string name="cancel">Cancel</string>
+    <string name="weather_data_tittle">Send weather data</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
