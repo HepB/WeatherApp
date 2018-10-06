@@ -27,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,9 +63,6 @@ import ru.lyubimov.weather.weatherapp.utils.ViewUtils;
 
 import static ru.lyubimov.weather.weatherapp.data.city.CityRepository.CITIES;
 
-/**
- * Created by Alex on 13.12.2017.
- */
 
 public class WeatherActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
@@ -226,7 +222,6 @@ public class WeatherActivity extends AppCompatActivity implements
 
         String cityName = Objects.requireNonNull(mForecastWeather.getCity()).getCityName();
         mCity.setText(cityName);
-        addPopup();
 
         String weatherDescription = Objects.requireNonNull(currentTimeWeather.getConditions()).get(0).getDescription();
         mWeatherDescription.setText(weatherDescription);
@@ -271,30 +266,6 @@ public class WeatherActivity extends AppCompatActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void addPopup() {
-        mCity.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(getApplicationContext(), v);
-            popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(item -> {
-                RequestContainer container = new RequestContainer();
-                container.setContext(getApplicationContext());
-                switch (item.getItemId()) {
-                    case R.id.menu_fetch_msk:
-                        container.setCityName("Moscow,RU");
-                        subscribe(container, mWeatherGetter);
-                        return true;
-                    case R.id.menu_fetch_lnd:
-                        container.setCityName("London,UK");
-                        subscribe(container, mWeatherGetter);
-                        return true;
-                    default:
-                        return false;
-                }
-            });
-            popupMenu.show();
-        });
     }
 
     @Override
